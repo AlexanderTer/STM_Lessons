@@ -1,4 +1,6 @@
+"./Src/gpio.o"
 "./Src/main.o"
 "./Src/rcc.o"
 "./Src/system_stm32f7xx.o"
+"./Src/timer.o"
 "./Startup/startup_stm32f746zgtx.o"

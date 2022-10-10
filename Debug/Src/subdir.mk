@@ -5,19 +5,25 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Src/gpio.c \
 ../Src/main.c \
 ../Src/rcc.c \
-../Src/system_stm32f7xx.c 
+../Src/system_stm32f7xx.c \
+../Src/timer.c 
 
 OBJS += \
+./Src/gpio.o \
 ./Src/main.o \
 ./Src/rcc.o \
-./Src/system_stm32f7xx.o 
+./Src/system_stm32f7xx.o \
+./Src/timer.o 
 
 C_DEPS += \
+./Src/gpio.d \
 ./Src/main.d \
 ./Src/rcc.d \
-./Src/system_stm32f7xx.d 
+./Src/system_stm32f7xx.d \
+./Src/timer.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -27,7 +33,7 @@ Src/%.o Src/%.su: ../Src/%.c Src/subdir.mk
 clean: clean-Src
 
 clean-Src:
-	-$(RM) ./Src/main.d ./Src/main.o ./Src/main.su ./Src/rcc.d ./Src/rcc.o ./Src/rcc.su ./Src/system_stm32f7xx.d ./Src/system_stm32f7xx.o ./Src/system_stm32f7xx.su
+	-$(RM) ./Src/gpio.d ./Src/gpio.o ./Src/gpio.su ./Src/main.d ./Src/main.o ./Src/main.su ./Src/rcc.d ./Src/rcc.o ./Src/rcc.su ./Src/system_stm32f7xx.d ./Src/system_stm32f7xx.o ./Src/system_stm32f7xx.su ./Src/timer.d ./Src/timer.o ./Src/timer.su
 
 .PHONY: clean-Src
 

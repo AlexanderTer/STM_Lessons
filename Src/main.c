@@ -17,6 +17,8 @@
  */
 
 #include "rcc.h"
+#include "gpio.h"
+#include "timer.h"
 #include <stdint.h>
 #include "stm32f7xx.h"
 
@@ -24,10 +26,8 @@
 int main(void)
 {
 	init_RCC();
-
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
-    GPIOD->MODER |= 1 << (1 << 1);
-
+    init_GPIO();
+    init_timer8();
     /* Loop forever */
     for(;;)
     {
