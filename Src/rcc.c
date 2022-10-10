@@ -53,12 +53,14 @@ void init_RCC(void)
     RCC->CR |= RCC_CR_PLLON;
     while(!(RCC->CR & RCC_CR_PLLRDY));
 
+    // Over Drive enable
+      PWR->CR1 |= (uint32_t)PWR_CR1_ODEN;
+      PWR->CR1 |= (uint32_t)PWR_CR1_ODSWEN;
+
     // Выбор PLL как основного источника тактирования
     RCC->CFGR |= RCC_CFGR_SW_PLL;
 
-    // Over Drive enable
-    PWR->CR1 |= (uint32_t)PWR_CR1_ODEN;
-    PWR->CR1 |= (uint32_t)PWR_CR1_ODSWEN;
+
 
     SystemCoreClockUpdate();
 }
