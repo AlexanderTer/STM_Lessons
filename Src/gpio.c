@@ -10,6 +10,7 @@ void init_GPIO(void)
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
 	init_GPIO_Output(GPIOD,1);
 	init_GPIO_AFunction(GPIOC,6,3);
+	init_GPIO_AFunction(GPIOC,7,3);
 }
 
 void init_GPIO_Output(GPIO_TypeDef * gpio, unsigned int pin){
