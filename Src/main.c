@@ -23,16 +23,19 @@
 #include <stdint.h>
 #include "stm32f7xx.h"
 
-
-int main(void)
-{
+int main(void) {
+	// Global interrupt disable
+	__disable_irq();
 	init_RCC();
-    init_GPIO();
-    init_timer8();
-    /* Loop forever */
-    for(;;)
-    {
-        for(int i = 0; i < 10000000; i++);
-        GPIOD->ODR ^= 1 << 1;
-    }
+	init_GPIO();
+	init_timer8();
+
+	// Global interrupt enable
+	__enable_irq();
+	/* Loop forever */
+	for (;;) {
+		for (int i = 0; i < 10000000; i++)
+			;
+		GPIOD->ODR ^= 1 << 1;
+	}
 }

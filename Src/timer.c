@@ -1,7 +1,7 @@
 #include "timer.h"
 #include "stm32f7xx.h"
 
-void init_timer8(void){
+void init_timer8(void) {
 	// Включение тактирования модуля таймер8
 	RCC->APB2ENR |= RCC_APB2ENR_TIM8EN;
 
@@ -27,6 +27,9 @@ void init_timer8(void){
 
 	// Вкл физ. канал выхода
 	TIM8->BDTR |= TIM_BDTR_MOE;
+
+	// Вкл прерывания по обновлению
+	TIM8->DIER |= TIM_DIER_UIE;
 
 	// Вкл счёт таймера
 	TIM8->CR1 |= TIM_CR1_CEN;
