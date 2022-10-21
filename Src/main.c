@@ -19,7 +19,8 @@
 #include "rcc.h"
 #include "gpio.h"
 #include "timer.h"
-
+#include "adc.h"
+#include "interrupt.h"
 #include <stdint.h>
 #include "stm32f7xx.h"
 
@@ -29,13 +30,14 @@ int main(void) {
 	init_RCC();
 	init_GPIO();
 	init_timer8();
+	init_adc();
+	init_interrupt();
 
 	// Global interrupt enable
 	__enable_irq();
 	/* Loop forever */
 	for (;;) {
-		for (int i = 0; i < 10000000; i++)
-			;
-		GPIOD->ODR ^= 1 << 1;
+		for (int i = 0; i < 10000000; i++);
+		//GPIOD->ODR ^= 1 << 1;
 	}
 }
