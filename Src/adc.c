@@ -29,15 +29,15 @@ void init_adc(void) {
 	ADC1->SQR1 |= 1 << 20;
 
 	// Включение режима сканирвания
-	ADC1->CR1 |= ADC_CR1SCAN;
-	ADC2->CR1 |= ADC_CR1SCAN;
-	ADC3->CR1 |= ADC_CR1SCAN;
+	ADC1->CR1 |= ADC_CR1_SCAN;
+	ADC2->CR1 |= ADC_CR1_SCAN;
+	ADC3->CR1 |= ADC_CR1_SCAN;
 
 	// Устанавливаем период выборки равным 15 циклов
 	ADC1->SMPR1 |= ADC_SMPR1_SMP18_0;
-	ADC1->SMPR1 |= ADC_SMPR2_SMP3_0;
+	ADC1->SMPR2 |= ADC_SMPR2_SMP3_0;
 
-	ADC2->SMPR1 |= ADC_SMPR2_SMP0_0;
+	ADC2->SMPR2 |= ADC_SMPR2_SMP0_0;
 	ADC2->SMPR1 |= ADC_SMPR1_SMP13_0;
 
 	ADC3->SMPR1 |= ADC_SMPR1_SMP14_0;

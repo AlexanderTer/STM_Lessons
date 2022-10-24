@@ -15,29 +15,34 @@
  *
  ******************************************************************************
  */
+#include <stdint.h>
+#include "stm32f7xx.h"
 
 #include "rcc.h"
 #include "gpio.h"
 #include "timer.h"
 #include "adc.h"
 #include "interrupt.h"
-#include <stdint.h>
-#include "stm32f7xx.h"
+#include "dma.h"
 
 int main(void) {
 	// Global interrupt disable
 	__disable_irq();
+
+	init_interrupt();
 	init_RCC();
 	init_GPIO();
-	init_timer8();
+	init_dma();
 	init_adc();
-	init_interrupt();
+	init_timer8();
 
 	// Global interrupt enable
 	__enable_irq();
+
 	/* Loop forever */
 	for (;;) {
-		for (int i = 0; i < 10000000; i++);
+		for (int i = 0; i < 10000000; i++)
+			;
 		//GPIOD->ODR ^= 1 << 1;
 	}
 }

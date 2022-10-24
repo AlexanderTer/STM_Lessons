@@ -15,12 +15,12 @@ void init_interrupt(void) {
 	// Включаем прерывание TIM8_UP_TIM13 в NVIC
 	NVIC_EnableIRQ(TIM8_UP_TIM13_IRQn);
 
-	// Установка приоритет прерыванийя TIM8_UP_TIM13: группа 2, приоритет 1
-	NVIC_SetPriority(ADC_IRQn,
+	// Установка приоритет прерыванийя
+	NVIC_SetPriority(DMA2_Stream0_IRQn,
 			NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 2, 1));
 
-	// Включаем прерывание TIM8_UP_TIM13 в NVIC
-	NVIC_EnableIRQ(ADC_IRQn);
+	//
+	NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 }
 
 void TIM8_UP_TIM13_IRQHandler(void) {
@@ -32,17 +32,19 @@ void TIM8_UP_TIM13_IRQHandler(void) {
 
 }
 
-void ADC_IRQHandler(void) {
+void DMA2_Stream0_IRQHandler(void) {
 
-	// Сброс флага
-	ADC1->SR &= ~ADC_SR_EOC;
+	// Сброс флага DMA2 по окончанию передачи данных
+	DMA2->LIFCR |= DMA_LIFCR_CTCIF0;
 	// Ожидание выполнения инструкций
 	__ISB();
 
 	const float av_slope = 2.5f * 0.001f;
 	const float v25 = 0.76f;
 
-	float v_sense = ADC1->DR * (3.3f / 4095.f);
+	extern volatile unsigned int ADC_Buffer[];
+
+	float v_sense = (float) ADC_Buffer[3] * (3.3f / 4095.f);
 
 	TEMPERATURE = (v_sense - v25) / av_slope + 25.f;
 

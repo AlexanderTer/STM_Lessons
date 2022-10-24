@@ -29,9 +29,18 @@ void init_dma(void) {
 	// Размер данных в месте назначения (массив) = 32 бита
 	DMA2_Stream0->CR |= DMA_SxCR_MSIZE_1;
 
-	// Прерывание по окончанию передачи
+	// Включение инкримента адреса в месте назначения
+	DMA2_Stream0->CR |= DMA_SxCR_MINC;
+
+	// Включение циклической передачи
 	DMA2_Stream0->CR |= DMA_SxCR_CIRC;
 
-	// Вкл DMA2 Stream0
+	// Прерывание по окончанию преобразования
 	DMA2_Stream0->CR |= DMA_SxCR_TCIE;
+
+	// Вкл  DMA
+	DMA2_Stream0->CR |= DMA_SxCR_EN;
+
+
+
 }
