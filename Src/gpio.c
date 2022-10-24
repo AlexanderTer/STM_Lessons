@@ -20,6 +20,8 @@ void init_GPIO(void) {
 	init_GPIO_Analog(GPIOF, 4); // Ток дросселя
 	init_GPIO_Analog(GPIOA, 3); // Сигнал инжекции
 
+	init_GPIO_Analog(GPIOA, 4); // ЦАП1
+	init_GPIO_Analog(GPIOA, 5); // ЦАП2
 }
 
 void init_GPIO_Output(GPIO_TypeDef *gpio, unsigned int pin) {

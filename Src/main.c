@@ -34,6 +34,7 @@ int main(void) {
 	init_GPIO();
 	init_dma();
 	init_adc();
+	init_dac();
 	init_timer8();
 
 	// Global interrupt enable

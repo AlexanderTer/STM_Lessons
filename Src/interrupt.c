@@ -48,4 +48,19 @@ void DMA2_Stream0_IRQHandler(void) {
 
 	TEMPERATURE = (v_sense - v25) / av_slope + 25.f;
 
+	/* Вывод сигнала на цап*/
+	static unsigned int cnt1 = 0, cnt2 = 4095;
+	static int dir = 1;
+
+	cnt1 += dir;
+	cnt2 -= dir;
+
+	if (cnt1 == 4095)
+		dir = -1;
+
+	if (cnt1 == 0)
+		dir = 1;
+
+	// Запись чисел в ЦАП1 и ЦАП2
+	DAC->DHR12RD = cnt1 | (cnt2 << 16);
 }
