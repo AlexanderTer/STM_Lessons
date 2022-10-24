@@ -31,6 +31,9 @@ void init_timer8(void) {
 	// Вкл прерывания по обновлению
 	TIM8->DIER |= TIM_DIER_UIE;
 
+	//Включение генерации TRGO по событию Update
+	TIM8->CR2 |= TIM_CR2_MMS_1;
+
 	// Вкл счёт таймера
 	TIM8->CR1 |= TIM_CR1_CEN;
 
