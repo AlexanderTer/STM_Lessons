@@ -46,6 +46,8 @@ void DMA2_Stream0_IRQHandler(void) {
 
 	float v_sense = (float) ADC_Buffer[3] * (3.3f / 4095.f);
 
+	extern volatile float TEMPERATURE;
+
 	TEMPERATURE = (v_sense - v25) / av_slope + 25.f;
 
 }
