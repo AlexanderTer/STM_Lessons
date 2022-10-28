@@ -29,33 +29,34 @@ float MovingFloatFilter(MovingFloatFilter_Struct *filter, float x) {
 	return filter->sum * (1.f / MAX_MOVING_FLOAT_SIZE);
 }
 
-int cmp( void *a,  void *b) {
+int cmp(const void *a, const void *b) {
 
-	float *af = (float) *a;
-	float *bf = (float) *b;
+	float *af = (float*) a;
+	float *bf = (float*) b;
 	if (*af > *bf)
 		return 1;
 	if (*af < *bf)
 		return -1;
-return 0
+	return 0;
 
 }
-float MedianFloatFilter(MovingFloatFilter_Struct *filter, float x) {
+
+float MedianFloatFilter(MedianFloatFilter_Struct *filter, float x) {
 
 // Добавляем новую точку в массив точек
-filter->buf[filter->pointer] = x;
+	filter->buf[filter->pointer] = x;
 
-if (++filter->pointer >= MAX_MEDIAN_FLOAT_SIZE)
-	filter->pointer = 0;
+	if (++filter->pointer >= MAX_MEDIAN_FLOAT_SIZE)
+		filter->pointer = 0;
 
 // Делаем копию массива точек
-for (int i = 0; i < MAX_MEDIAN_FLOAT_SIZE; i++) {
-	filter->buf_sorted[i] = filter->buf[i];
+	for (int i = 0; i < MAX_MEDIAN_FLOAT_SIZE; i++)
+		filter->buf_sorted[i] = filter->buf[i];
 
 	__ISB();
 	__DSB();
 
-	// Сортируем массив
+// Сортируем массив
 	qsort(filter->buf_sorted, MAX_MEDIAN_FLOAT_SIZE,
 			sizeof(filter->buf_sorted[0]),
 			(int (*)(const void*, const void*)) cmp);

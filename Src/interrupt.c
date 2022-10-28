@@ -1,5 +1,5 @@
 #include "interrupt.h"
-#inclide "dsp.h"
+#include "dsp.h"
 #include "stm32f7xx.h"
 
 volatile float TEMPERATURE;
@@ -62,5 +62,5 @@ void DMA2_Stream0_IRQHandler(void) {
 	//dac2 = MedianFloatFilter(&TEMPERATURE_MOV, TEMPERATURE) * (4095.f / 100.f);
 
 	// Запись чисел в ЦАП1 и ЦАП2
-	DAC->DHR12RD = cnt1 | (cnt2 << 16);
+	DAC->DHR12RD = dac1 | (dac1 << 16);
 }
