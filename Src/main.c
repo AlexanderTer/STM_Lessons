@@ -24,6 +24,12 @@
 #include "adc.h"
 #include "interrupt.h"
 #include "dma.h"
+#include "dac.h"
+#include "dsp.h"
+
+#include "control.h"
+
+
 
 int main(void) {
 	// Global interrupt disable
@@ -37,13 +43,20 @@ int main(void) {
 	init_dac();
 	init_timer8();
 
+
+
 	// Global interrupt enable
 	__enable_irq();
 
 	/* Loop forever */
 	for (;;) {
-		for (int i = 0; i < 10000000; i++)
+		for (int i = 0; i < 100000; i++)
 			;
-		//GPIOD->ODR ^= 1 << 1;
+		GPIOD->ODR ^= 1 << 1;
+
+		// Проверяем PB1 (SW1) на ноль.
+		if (!(GPIOB->IDR & (1 << 1)))
+			Boost_Measure.count = SET_SHIFTS_MAX_COUNT;
+
 	}
 }

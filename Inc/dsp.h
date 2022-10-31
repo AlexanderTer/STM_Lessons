@@ -25,5 +25,5 @@ typedef struct{
 float MovingFloatFilter(MovingFloatFilter_Struct *filter, float x);
 float MedianFloatFilter(MedianFloatFilter_Struct *filter, float x);
 
-extern MovingFloatFilter_Struct TEMPERATURE_MOV;
-extern MedianFloatFilter_Struct TEMPERATURE_MED;
+extern MovingFloatFilter_Struct FILTER_MOV;
+extern MedianFloatFilter_Struct FILTER_MED;

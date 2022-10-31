@@ -2,11 +2,13 @@
 #include "stm32f7xx.h"
 void init_GPIO_Output(GPIO_TypeDef *gpio, unsigned int pin);
 void init_GPIO_AFunction(GPIO_TypeDef *gpio, unsigned int pin, unsigned int AF);
+void init_GPIO_Analog(GPIO_TypeDef * gpio, unsigned int pin);
 
 void init_GPIO(void) {
 
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOFEN;
 

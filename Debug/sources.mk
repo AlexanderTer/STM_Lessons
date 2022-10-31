@@ -23,5 +23,6 @@ C_DEPS :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 Src \
+Src/periph \
 Startup \
 

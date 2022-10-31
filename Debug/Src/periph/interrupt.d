@@ -1,4 +1,5 @@
-Src/timer.o: ../Src/timer.c ../Inc/timer.h \
+Src/periph/interrupt.o: ../Src/periph/interrupt.c \
+ D:/STM_Lessons/Inc/periph/interrupt.h \
  D:/STM_Lessons/Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f7xx.h \
  D:/STM_Lessons/Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f746xx.h \
  D:/STM_Lessons/Drivers/CMSIS/Include/core_cm7.h \
@@ -7,7 +8,7 @@ Src/timer.o: ../Src/timer.c ../Inc/timer.h \
  D:/STM_Lessons/Drivers/CMSIS/Include/cmsis_gcc.h \
  D:/STM_Lessons/Drivers/CMSIS/Include/mpu_armv7.h \
  D:/STM_Lessons/Drivers/CMSIS/Device/ST/STM32F7xx/Include/system_stm32f7xx.h
-../Inc/timer.h:
+D:/STM_Lessons/Inc/periph/interrupt.h:
 D:/STM_Lessons/Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f7xx.h:
 D:/STM_Lessons/Drivers/CMSIS/Device/ST/STM32F7xx/Include/stm32f746xx.h:
 D:/STM_Lessons/Drivers/CMSIS/Include/core_cm7.h:

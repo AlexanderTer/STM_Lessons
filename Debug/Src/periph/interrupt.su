@@ -3,5 +3,5 @@ D:/STM_Lessons/Drivers/CMSIS/Include/core_cm7.h:1884:26:__NVIC_GetPriorityGroupi
 D:/STM_Lessons/Drivers/CMSIS/Include/core_cm7.h:1896:22:__NVIC_EnableIRQ	16	static
 D:/STM_Lessons/Drivers/CMSIS/Include/core_cm7.h:2024:22:__NVIC_SetPriority	16	static
 D:/STM_Lessons/Drivers/CMSIS/Include/core_cm7.h:2071:26:NVIC_EncodePriority	40	static
-../Src/interrupt.c:4:6:init_interrupt	8	static
-../Src/interrupt.c:17:6:TIM8_UP_TIM13_IRQHandler	4	static
+../Src/periph/interrupt.c:6:6:init_interrupt	8	static
+../Src/periph/interrupt.c:26:6:TIM8_UP_TIM13_IRQHandler	4	static,ignoring_inline_asm

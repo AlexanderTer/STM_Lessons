@@ -13,8 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-MovingFloatFilter_Struct TEMPERATURE_MOV;
-MedianFloatFilter_Struct TEMPERATURE_MED;
+MovingFloatFilter_Struct FILTER_MOV;
+MedianFloatFilter_Struct FILTER_MED;
 
 float MovingFloatFilter(MovingFloatFilter_Struct *filter, float x) {
 
