@@ -42,7 +42,7 @@ void DMA2_Stream0_IRQHandler(void) {
 	Boost_Measure.dac[0].data = Boost_Measure.data.inj;
 
 	// Фильтруем  и выводим переменную на ЦАП2
-	Boost_Measure.dac[1].data = MovingFloatFilter(&FILTER_MOV,
+	Boost_Measure.dac[1].data = Low_Filter_1st_Order(&FILTER_1ORD,
 			Boost_Measure.data.inj);
 
 	// Фильтруем переменную

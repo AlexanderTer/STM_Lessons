@@ -15,6 +15,10 @@
 
 MovingFloatFilter_Struct FILTER_MOV;
 MedianFloatFilter_Struct FILTER_MED;
+Low_Filter_1st_Order_Struct FILTER_1ORD = {
+		.b0 = TS / (TAU_1ORD + TS),
+		.a1 = -TAU_1ORD / (TAU_1ORD + TS)
+};
 
 float MovingFloatFilter(MovingFloatFilter_Struct *filter, float x) {
 
@@ -62,4 +66,18 @@ float MedianFloatFilter(MedianFloatFilter_Struct *filter, float x) {
 			(int (*)(const void*, const void*)) cmp);
 
 	return filter->buf_sorted[MAX_MEDIAN_FLOAT_SIZE >> 1];
+}
+
+/**
+ * \brief Функция фильтра нижних частот первого порядка
+ */
+
+float Low_Filter_1st_Order(Low_Filter_1st_Order_Struct * filter, float x){
+
+  float y = x * filter->b0 - filter->yn * filter->a1;
+
+  //Сохраняем выходную переменную для следующего такта
+  filter->yn = y;
+  return y;
+
 }

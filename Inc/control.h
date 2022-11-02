@@ -40,4 +40,5 @@ typedef struct {
 extern Control_Struct Boost_Control;
 extern Measure_Struct Boost_Measure;
 extern Protect_Struct Boost_Protect;
+
 #endif
