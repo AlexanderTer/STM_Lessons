@@ -11,9 +11,24 @@ void init_GPIO(void) {
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOFEN;
+	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOGEN;
 
-	init_GPIO_Output(GPIOD, 1);
+	// Светодиоды
+	init_GPIO_Output(GPIOD, 1); // HL1
+	init_GPIO_Output(GPIOD, 2); // HL2
+	init_GPIO_Output(GPIOD, 3); // HL3
+	init_GPIO_Output(GPIOD, 4); // HL4
+	init_GPIO_Output(GPIOD, 5); // HL5
+
+	// Тестовые выводы
 	init_GPIO_Output(GPIOD, 6);
+	init_GPIO_Output(GPIOD, 7);
+	init_GPIO_Output(GPIOG, 9);
+	init_GPIO_Output(GPIOG, 10);
+	init_GPIO_Output(GPIOG, 11);
+
+
+	// Выход TIM8 CH1
 	init_GPIO_AFunction(GPIOC, 6, 3);
 
 	init_GPIO_Analog(GPIOA, 0); // Выходное напряжение

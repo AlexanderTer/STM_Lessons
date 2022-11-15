@@ -29,8 +29,6 @@
 
 #include "control.h"
 
-
-
 int main(void) {
 	// Global interrupt disable
 	__disable_irq();
@@ -42,8 +40,6 @@ int main(void) {
 	init_adc();
 	init_dac();
 	init_timer8();
-
-
 
 	// Global interrupt enable
 	__enable_irq();
@@ -58,5 +54,11 @@ int main(void) {
 		if (!(GPIOB->IDR & (1 << 1)))
 			Boost_Measure.count = SET_SHIFTS_MAX_COUNT;
 
+		// Проверить PB2 (sw2) на ноль
+		if (!(GPIOB->IDR & (1 << 2))) {
+			timer_PWM_On();
+		GPIOD->ODR &= ~((1<<2)|(1<<3)|(1<<4)|(1<<5));
 	}
+
+}
 }
