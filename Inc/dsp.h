@@ -5,7 +5,11 @@
 #define MAX_MEDIAN_FLOAT_SIZE 500
 #define MAX_ORDER_DIGITAL_FILTER (2)
 
-#define TS (1/100.e3)    // Период дискретизации
+#define FS (100000) // Частота дискретизации
+#define TS (1/(FS)) // Период дискретизации
+
+
+//#define TS (1/100.e3)    // Период дискретизации
 #define TAU_1ORD (0.001 / 2. / 3.1415926535) // Постоянная времени фильтра
 
 typedef struct {

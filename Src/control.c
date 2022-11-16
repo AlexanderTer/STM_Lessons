@@ -28,13 +28,23 @@ Measure_Struct Boost_Measure = {
 		},
 };
 
-Protect_Struct Boost_Protect = { .iL_max = 6., .in_max = 1., .u1_max = 90.,
-		.u2_max = 100. };
+Protect_Struct Boost_Protect = {
+		.iL_max = 6.,
+		.in_max = 3.,
+		.u1_max = 90.,
+		.u2_max = 100.,
+
+		.iL_n = 2.,
+		.iL_int_max = 1. * 5.
+};
 
 volatile float TEMPERATURE;
 void shift_and_scale(void);
 void set_shifts(void);
 void protect_software(void);
+void integral_protect(void);
+
+void timer_PWM_Off(void);
 void DMA2_Stream0_IRQHandler(void) {
 
 	// Сброс флага DMA2 по окончанию передачи данных
@@ -132,4 +142,42 @@ void protect_software(void) {
 		timer_PWM_Off();
 		GPIOD->ODR |= 1 << 5;
 	}
+
+	// Интегральная токовая защита
+	integral_protect();
+}
+
+/**
+ * \brief Функция интегрально-токовой защиты по току реактора
+ */
+void integral_protect(void){
+
+	// Разница между током реатора и его номинальным значением
+	float x = Boost_Measure.data.iL - Boost_Protect.iL_n;
+
+	// Расчёт выхода интегратора
+	Boost_Protect.iL_int_sum = Boost_Protect.iL_int_sum + x * TS;
+
+	// Обнуляем интегратор в нормальном режиме работы
+	if (Boost_Protect.iL_int_sum < 0) Boost_Protect.iL_int_sum = 0;
+
+	// Проверяем условие срабаотывания защиты
+	if(Boost_Protect.iL_int_sum > Boost_Protect.iL_int_max){
+		Boost_Protect.iL_int_sum = 0;
+		timer_PWM_Off();
+		GPIOD->ODR &= ~((1 << 2) | (1 << 3) | (1 << 4) | (1 << 5));
+
+	}
+}
+
+
+/**
+ *  \brief Функция обработчик прерывания EXTI1 (1 линия), PB1.
+ */
+void EXTI1_IRQHandler(void){
+
+	// Сброс флага прерывания EXTI1.
+	EXTI->PR |= EXTI_PR_PR1;
+
+	timer_PWM_Off();
 }
