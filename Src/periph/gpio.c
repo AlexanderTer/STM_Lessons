@@ -12,6 +12,7 @@ void init_GPIO(void) {
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOFEN;
 	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOGEN;
+	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 
 	// Светодиоды
 	init_GPIO_Output(GPIOD, 1); 	// HL1
@@ -43,6 +44,7 @@ void init_GPIO(void) {
 	SYSCFG->EXTICR[0] |= 1 << 4;	// Настраиваем PB1 на внешниее прерывание
 	EXTI->IMR |= EXTI_IMR_IM1; 		//Значение прерывания по линии 1 (PB1)
 	EXTI->FTSR |= EXTI_FTSR_TR1; 	// Прерывание по срезу
+	EXTI->RTSR |= EXTI_RTSR_TR1; 	// Прерывание по фронту
 }
 
 void init_GPIO_Output(GPIO_TypeDef *gpio, unsigned int pin) {

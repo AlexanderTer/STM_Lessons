@@ -178,6 +178,13 @@ void EXTI1_IRQHandler(void){
 
 	// Сброс флага прерывания EXTI1.
 	EXTI->PR |= EXTI_PR_PR1;
+	__ISB();
 
-	timer_PWM_Off();
+	// Если на PB1 логический 0, включаем ШИМ
+	if(!(GPIOB->IDR & (1<<1)))
+		timer_PWM_Off();
+	else
+		timer_PWM_On();
+
+
 }
