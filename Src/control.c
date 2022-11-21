@@ -21,21 +21,24 @@ Measure_Struct Boost_Measure = {
 				.u1 = 0.024982,
 				.in = 9.8970e-04 },
 
-		.dac[0] = { .shift = 4095 / 2,
-				.scale = 4095. / 3.3 }, .dac[1] = {
-				.shift = 4095 / 2,
-				.scale = 4095. / 3.3
-		},
+		.dac[0] = {.shift = 0, .scale = 4095. / 1. },
+
+		.dac[1] = {.shift = 0, .scale = 4095. / 6.},
 };
 
 Protect_Struct Boost_Protect = {
-		.iL_max = 6.,
+		.iL_max = 8.,
 		.in_max = 3.,
 		.u1_max = 90.,
 		.u2_max = 100.,
 
 		.iL_n = 2.,
-		.iL_int_max = 1. * 5.
+		.iL_int_max = 2. * 10.,
+
+		.sat = {
+				.duty_min = 0.02,
+				.duty_max = 0.98,
+		},
 };
 
 volatile float TEMPERATURE;
@@ -59,15 +62,21 @@ void DMA2_Stream0_IRQHandler(void) {
 
 	set_shifts();
 
+	// 0.4 Номинальный коэф
+	// 0.04 - 10% от номинального
+	// 1.65 Макс амплитуда переменной составляющей инжектируемого сигнала в [В]
+	Boost_Control.duty = 0.4f + Boost_Measure.data.inj * (0.004f / 1.65f);
+	// Регистр сравнения: ARR * (коэффициент заполнения)
+		TIM8->CCR1 = TIM8->ARR * LIMIT(Boost_Control.duty, Boost_Protect.sat.duty_min,Boost_Protect.sat.duty_max);
+
 	/* Вывод сигнала на цап*/
 	unsigned int dac1, dac2;
 
-	// Выводим переменную на ЦАП1
-	Boost_Measure.dac[0].data = Boost_Measure.data.inj;
+	//
+	Boost_Measure.dac[0].data = Boost_Control.duty;
 
-	// Фильтруем  и выводим переменную на ЦАП2
-	Boost_Measure.dac[1].data = DirectFormI_FloatFilter(&FILTER_DIG2,
-			Boost_Measure.data.inj);
+	// Выводим переменную на ЦАП2
+	Boost_Measure.dac[1].data =  Boost_Measure.data.iL;
 
 	// Фильтруем переменную
 	//dac2 = MovingFloatFilter(&FILTER_MOV, Boost_Measure.data.inj) * (4095.f / 100.f);
@@ -181,10 +190,10 @@ void EXTI1_IRQHandler(void){
 	__ISB();
 
 	// Если на PB1 логический 0, включаем ШИМ
-	if(!(GPIOB->IDR & (1<<1)))
-		timer_PWM_Off();
-	else
-		timer_PWM_On();
+	//if(!(GPIOB->IDR & (1<<1)))
+	//	timer_PWM_Off();
+	//else
+	//	timer_PWM_On();
 
 
 }

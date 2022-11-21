@@ -2,8 +2,10 @@
 #define __CONTROL_H__
 
 #define SET_SHIFTS_MAX_COUNT ((unsigned int)(0.5 * 100.e3))
-
+#define LIMIT(x,min,max) (((x) < (min)) ? (min) : (((x) > (max)) ? (max):(x)))
 typedef struct {
+
+	float duty; // Коэффициент заполнения, [0..1]
 
 } Control_Struct; // Структура с параметрами системы кправления
 
@@ -43,6 +45,11 @@ typedef struct {
 	float iL_int_sum; // Сумма (выход интегратора) интегрально-токовой защиты (A*c)
 	float iL_int_max; // Уставка условия срабатывания интегрально-токовой защиты (A*c)
 	float iL_n;       // Номинальный ток реатора
+
+	struct{
+		float duty_min;		// Минимальный коэффициент заполнения
+		float duty_max;		// Максимальный коэффициент заполнения
+	}sat; // Параметры ограничителей
 
 } Protect_Struct; // Структура с параметрами защит
 

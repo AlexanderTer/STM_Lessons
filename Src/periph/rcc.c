@@ -14,6 +14,9 @@ void init_RCC(void) {
 
 	RCC->APB2RSTR = 0xFFFFFFFF;
 	RCC->APB2RSTR = 0x00000000;
+// Кэш инструкций
+	SCB_InvalidateICache();
+	    SCB_EnableICache();
 
 	// Обновление переменной с частотой тактирования
 
