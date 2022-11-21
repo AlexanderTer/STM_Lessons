@@ -21,9 +21,9 @@ Measure_Struct Boost_Measure = {
 				.u1 = 0.024982,
 				.in = 9.8970e-04 },
 
-		.dac[0] = {.shift = 0, .scale = 4095. / 1. },
+		.dac[0] = {.shift = 0, .scale = 4095. },
 
-		.dac[1] = {.shift = 0, .scale = 4095. / 6.},
+		.dac[1] = {.shift = 0, .scale = 4095.},
 };
 
 Protect_Struct Boost_Protect = {
@@ -40,6 +40,36 @@ Protect_Struct Boost_Protect = {
 				.duty_max = 0.98,
 		},
 };
+
+
+LinearRamp_Struct LINEAR_RAMP =
+{
+		.integrator =
+		{
+				.k = 0.25 * TS,
+				.sat = {.min = -999999., .max = 999999.},
+		},
+};
+
+SSHapedRamp_Struct SSHAPED_RAMP =
+{
+		.integrator[0] =
+		{
+				.k = 1.*TS,
+				.sat = { .min = -999999., .max = 999999.}
+		},
+
+		.integrator[1] =
+		{
+				.k = 0.25 *TS,
+				.sat = { .min = -999999., .max = 999999.}
+		},
+		.k3 = 0.125
+
+};
+
+
+
 
 volatile float TEMPERATURE;
 void shift_and_scale(void);
@@ -73,10 +103,10 @@ void DMA2_Stream0_IRQHandler(void) {
 	unsigned int dac1, dac2;
 
 	//
-	Boost_Measure.dac[0].data = Boost_Control.duty;
+	Boost_Measure.dac[0].data = LinearRamp(&LINEAR_RAMP, 1.f);
 
 	// Выводим переменную на ЦАП2
-	Boost_Measure.dac[1].data =  Boost_Measure.data.iL;
+	Boost_Measure.dac[1].data = SSHapedRamp(&SSHAPED_RAMP, 1.f);
 
 	// Фильтруем переменную
 	//dac2 = MovingFloatFilter(&FILTER_MOV, Boost_Measure.data.inj) * (4095.f / 100.f);

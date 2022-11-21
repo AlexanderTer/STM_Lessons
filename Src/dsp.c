@@ -12,6 +12,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 MovingFloatFilter_Struct FILTER_MOV;
 MedianFloatFilter_Struct FILTER_MED;
@@ -149,4 +150,69 @@ float DirectFormI_FloatFilter(DigitalFilter_Struct * filter, float x){
 		filter-> z[1][i] = filter -> z[1][i-1];
 		}
 	return filter ->z[1][0];
+}
+
+/**
+ * \brief Функция интегратора методом прямоугольников (Bacward Euler)
+ * \param integrator: структура с параметрами интегратора
+ * \param x: вход интегратора
+ * \return y: выход интегратора
+ */
+float BackwardEuler_Integrator(BackwardEuler_Integrator_Struct * integrator, float x){
+
+	// Накапливаем сумму
+	integrator->sum = LIMIT(integrator->sum + integrator->k * x, integrator->sat.min, integrator->sat.max);
+
+	// Возвращаем значение суммы
+	return integrator->sum;
+
+}
+
+/**
+ * \brief Функция линейного задатчика
+ * \param ramp: структура с параметрами задатчика
+ * \param x: вход задатчика
+ * \return y: выход задатчика
+ */
+float LinearRamp(LinearRamp_Struct * ramp, float x){
+
+	// s = x-r
+	float s = x - ramp->integrator.sum;
+
+	// Функция знака (sign)
+	if(signbit(s)) // Если s имеет знак минус (число отрицательное)
+		s = -1.f;
+	else
+		s = 1.f;
+	//Интегрируем выход функции знака
+	return BackwardEuler_Integrator(&ramp->integrator, s);
+}
+
+/**
+ * \brief Функция S-образного задатчика
+ * \param ramp: структура с параметрами задатчика
+ * \param x: вход задатчика
+ * \return y: выход задатчика
+ */
+float SSHapedRamp(SSHapedRamp_Struct * ramp, float x){
+
+	// s1 = x - (r +-k3 * p^2) = x-r -+k3 * p^2
+	float s1 = x - ramp->integrator[1].sum - ramp->k3 * ramp->integrator[0].sum * fabsf(ramp->integrator[0].sum);
+
+	// Функция знака (sign)
+	if(signbit(s1)) // Если s1 имеет знак минус (число отрицательное)
+		s1 = -1.f;
+	else
+		s1 = 1.f;
+
+	float s2 = s1 -ramp->k3 * ramp->integrator[0].sum;
+
+	// Функция знака (sign)
+	if(signbit(s2)) // Если s2 имеет знак минус (число отрицательное)
+		s2 = -1.f;
+	else
+		s2 = 1.f;
+
+	float p =  BackwardEuler_Integrator(&ramp->integrator[0], s2);
+	 return BackwardEuler_Integrator(&ramp->integrator[1], p);
 }

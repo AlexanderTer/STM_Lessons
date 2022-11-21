@@ -2,7 +2,7 @@
 #define __CONTROL_H__
 
 #define SET_SHIFTS_MAX_COUNT ((unsigned int)(0.5 * 100.e3))
-#define LIMIT(x,min,max) (((x) < (min)) ? (min) : (((x) > (max)) ? (max):(x)))
+
 typedef struct {
 
 	float duty; // Коэффициент заполнения, [0..1]
