@@ -41,6 +41,8 @@ int main(void) {
 	init_dac();
 	init_timer8();
 
+	for (int i = 0; i< 5000; i++);
+
 	// Global interrupt enable
 	__enable_irq();
 
@@ -56,6 +58,9 @@ int main(void) {
 
 		// Проверить PB2 (sw2) на ноль
 		if (!(GPIOB->IDR & (1 << 2))) {
+			extern float REF_CONTROLLER;
+			REF_CONTROLLER = 1.f;
+
 			timer_PWM_On();
 		GPIOD->ODR &= ~((1<<2)|(1<<3)|(1<<4)|(1<<5));
 	}

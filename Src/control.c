@@ -68,7 +68,30 @@ SSHapedRamp_Struct SSHAPED_RAMP =
 
 };
 
+PID_Controller_Struct PID_CONTROLLER =
+{
+		.kp = 0.5,
+		.integrator =
+		{
+				.k = 0.5 / 0.05 * (TS / 2.),
+				.sat = { .min = 0., .max = 1. }
+		},
+		.sat = { .min = 0., .max = 1. },
+};
 
+PID_Controller_Struct PID__BC_CONTROLLER =
+{
+		.kp = 0.5,
+		.kb = 0.05 / (0.5 / 0.05),
+		.integrator =
+		{
+				.k = 0.5 / 0.05 * (TS / 2.),
+				.sat = { .min = -9999., .max = 9999. }
+		},
+		.sat = { .min = 0., .max = 1. },
+};
+
+float REF_CONTROLLER = 0.;
 
 
 volatile float TEMPERATURE;
@@ -103,10 +126,10 @@ void DMA2_Stream0_IRQHandler(void) {
 	unsigned int dac1, dac2;
 
 	//
-	Boost_Measure.dac[0].data = LinearRamp(&LINEAR_RAMP, 1.f);
+	Boost_Measure.dac[0].data = PID_Controller(&PID_CONTROLLER, REF_CONTROLLER);
 
 	// Выводим переменную на ЦАП2
-	Boost_Measure.dac[1].data = SSHapedRamp(&SSHAPED_RAMP, 1.f);
+	Boost_Measure.dac[1].data = PID_BackCalc_Controller(&PID__BC_CONTROLLER, REF_CONTROLLER);
 
 	// Фильтруем переменную
 	//dac2 = MovingFloatFilter(&FILTER_MOV, Boost_Measure.data.inj) * (4095.f / 100.f);

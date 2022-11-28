@@ -16,27 +16,15 @@
 
 MovingFloatFilter_Struct FILTER_MOV;
 MedianFloatFilter_Struct FILTER_MED;
-Low_Filter_1st_Order_Struct FILTER_1ORD = {
-		.b0 = TS / (TAU_1ORD + TS),
-		.a1 = -TAU_1ORD / (TAU_1ORD + TS)
-};
-DigitalFilter_Struct FILTER_DIG1 = {
-		.b[0] = 0.013359200027857,
-		.b[1] = 0.026718400055713,
-		.b[2] = 0.013359200027857,
-		.a[0] =1,
-		.a[1] = -1.647459981076977,
-		.a[2] = 0.700896781188403,
-};
+Low_Filter_1st_Order_Struct FILTER_1ORD = { .b0 = TS / (TAU_1ORD + TS), .a1 =
+		-TAU_1ORD / (TAU_1ORD + TS) };
+DigitalFilter_Struct FILTER_DIG1 = { .b[0] = 0.013359200027857, .b[1
+		] = 0.026718400055713, .b[2] = 0.013359200027857, .a[0] =1, .a[1
+		] = -1.647459981076977, .a[2] = 0.700896781188403, };
 
-DigitalFilter_Struct FILTER_DIG2 = {
-		.b[0] = 0.993755964953657,
-		.b[1] = -1.925108587845861,
-		.b[2] = 0.993755964953657,
-		.a[0] = 1,
-		.a[1] = -1.925108587845860,
-		.a[2] = 0.987511929907314,
-};
+DigitalFilter_Struct FILTER_DIG2 = { .b[0] = 0.993755964953657, .b[1
+		] = -1.925108587845861, .b[2] = 0.993755964953657, .a[0] = 1, .a[1
+		] = -1.925108587845860, .a[2] = 0.987511929907314, };
 
 float MovingFloatFilter(MovingFloatFilter_Struct *filter, float x) {
 
@@ -90,13 +78,13 @@ float MedianFloatFilter(MedianFloatFilter_Struct *filter, float x) {
  * \brief Функция фильтра нижних частот первого порядка
  */
 
-float Low_Filter_1st_Order(Low_Filter_1st_Order_Struct * filter, float x){
+float Low_Filter_1st_Order(Low_Filter_1st_Order_Struct *filter, float x) {
 
-  float y = x * filter->b0 - filter->yn * filter->a1;
+	float y = x * filter->b0 - filter->yn * filter->a1;
 
-  //Сохраняем выходную переменную для следующего такта
-  filter->yn = y;
-  return y;
+	//Сохраняем выходную переменную для следующего такта
+	filter->yn = y;
+	return y;
 
 }
 
@@ -106,50 +94,48 @@ float Low_Filter_1st_Order(Low_Filter_1st_Order_Struct * filter, float x){
  * \param х: выходная переменная
  * \return y: значение после фильтрации
  */
-float DirectFormII_FloatFilter(DigitalFilter_Struct * filter, float x){
+float DirectFormII_FloatFilter(DigitalFilter_Struct *filter, float x) {
 	float y = 0;
 
 	// w = x
-	filter ->z[0][0] = x;
-	for (int i = MAX_ORDER_DIGITAL_FILTER; i >= 1; i--){
+	filter->z[0][0] = x;
+	for (int i = MAX_ORDER_DIGITAL_FILTER; i >= 1; i--) {
 
 		// Суммирование ветвей с коэффициентами а
-		filter -> z[0][0] -= filter ->z[0][i] * filter->a[i];
+		filter->z[0][0] -= filter->z[0][i] * filter->a[i];
 
 		// Суммироание ветвей с коэффициентами b
-		y += filter->z[0][i] * filter ->b[i];
+		y += filter->z[0][i] * filter->b[i];
 
 		// Сохранение предыдущих значений
-		filter->z[0][i] = filter->z[0][i-1];
-
+		filter->z[0][i] = filter->z[0][i - 1];
 
 	}
 
 	// y += w * b0
-	y += filter ->z[0][0] * filter ->b[0];
+	y += filter->z[0][0] * filter->b[0];
 
 	return y;
 }
 
-
-float DirectFormI_FloatFilter(DigitalFilter_Struct * filter, float x){
-	filter -> z[0][0] = x;
-	filter -> z[1][0] = x * filter->b[0];
+float DirectFormI_FloatFilter(DigitalFilter_Struct *filter, float x) {
+	filter->z[0][0] = x;
+	filter->z[1][0] = x * filter->b[0];
 
 	// Вычисление первого каскада с коэффициентами b
-	for (int i = MAX_ORDER_DIGITAL_FILTER; i >= 1; i--){
+	for (int i = MAX_ORDER_DIGITAL_FILTER; i >= 1; i--) {
 		// v = v + bi * x * z^(-i)
-		filter -> z[1][0] += filter ->z[0][i] * filter ->b[i];
-		filter-> z[0][i] = filter -> z[0][i-1];
+		filter->z[1][0] += filter->z[0][i] * filter->b[i];
+		filter->z[0][i] = filter->z[0][i - 1];
 	}
 
 	// Вычисление второго каскада с коэффициентами а
-	for (int i = MAX_ORDER_DIGITAL_FILTER; i >= 1; i--){
+	for (int i = MAX_ORDER_DIGITAL_FILTER; i >= 1; i--) {
 
-		filter -> z[1][0] -= filter ->z[1][i] * filter ->a[i];
-		filter-> z[1][i] = filter -> z[1][i-1];
-		}
-	return filter ->z[1][0];
+		filter->z[1][0] -= filter->z[1][i] * filter->a[i];
+		filter->z[1][i] = filter->z[1][i - 1];
+	}
+	return filter->z[1][0];
 }
 
 /**
@@ -158,10 +144,11 @@ float DirectFormI_FloatFilter(DigitalFilter_Struct * filter, float x){
  * \param x: вход интегратора
  * \return y: выход интегратора
  */
-float BackwardEuler_Integrator(BackwardEuler_Integrator_Struct * integrator, float x){
+float BackwardEuler_Integrator(Integrator_Struct *integrator, float x) {
 
 	// Накапливаем сумму
-	integrator->sum = LIMIT(integrator->sum + integrator->k * x, integrator->sat.min, integrator->sat.max);
+	integrator->sum = LIMIT(integrator->sum + integrator->k * x,
+			integrator->sat.min, integrator->sat.max);
 
 	// Возвращаем значение суммы
 	return integrator->sum;
@@ -169,18 +156,146 @@ float BackwardEuler_Integrator(BackwardEuler_Integrator_Struct * integrator, flo
 }
 
 /**
+ * \brief Функция интегратора методом прямоугольников (Bacward Euler)
+ *  с алгоритмом компенсационного суммирования Кэхена
+ * \param integrator: структура с параметрами интегратора
+ * \param x: вход интегратора
+ * \return y: выход интегратора
+ */
+float BackwardEuler_Kahan_Integrator(Integrator_Struct *integrator, float x) {
+	// y = input - c
+	float y = integrator->k * x - integrator->c;
+
+	// t = sum + y
+	float t = integrator->sum + y;
+
+	// c = (t - sum) - y
+	integrator->c = (t - integrator->sum) - y;
+
+	// Накапливаем сумму
+	integrator->sum = LIMIT(integrator->sum + integrator->k * x,
+			integrator->sat.min, integrator->sat.max);
+
+	// Возвращаем значение суммы
+	return integrator->sum;
+
+}
+
+/**
+ * \brief Функция интегратора методом трапеций
+ * \param integrator: структура с параметрами интегратора
+ * \param x: вход интегратора
+ * \return y: выход интегратора
+ */
+float Trapezoidal_Integrator(Integrator_Struct *integrator, float x) {
+
+	// y[n] = s[n-1] + x[n]*k
+	float out = LIMIT(integrator->sum + integrator->k * x, integrator->sat.min,
+			integrator->sat.max);
+
+	// s[n] = y[n] * k
+	integrator->sum = out + x * integrator->k;
+	return out;
+}
+
+/**
+ * \brief Функция интегратора методом трапеций
+ * \param integrator: структура с параметрами интегратора
+ * \param x: вход интегратора
+ * \return y: выход интегратора
+ */
+float Trapezoidal_Kahan_Integrator(Integrator_Struct *integrator, float x) {
+
+	// y[n] = s[n-1] + x[n]*k
+	float out = LIMIT(integrator->sum + integrator->k * x, integrator->sat.min,
+			integrator->sat.max);
+
+	float y = 2.f * x * integrator->k - integrator->c;
+
+	// t = sum + y
+	float t = integrator->sum + y;
+
+	// c = (t-sum)-y
+	integrator->c = (t - integrator->sum) - y;
+
+
+	// s[n] = out[n] * k
+	integrator->sum = t;
+	return out;
+}
+
+
+
+/**
+ * \brief Функция дифференциатора методом эёлера
+ * \param diff: структура с параметрами дифференциатора
+ * \param x: вход дифференциатора
+ * \return y: выход дифференциатора
+ */
+float BackwardEuler_Diff(Diff_Struct *diff, float x) {
+
+	// y[n] = (x[n] - x[n-1]) * k
+	float out = (x - diff->xz) * diff->k;
+
+	// Сохнаняем текущее значение х
+	diff->xz = x;
+	return out;
+
+}
+
+float PID_Controller(PID_Controller_Struct *pid, float x) {
+
+	// Расчёт пропорциональной части
+	float out_p = x * pid->kp;
+
+	// Расчёт интегральной части
+	float out_i = Trapezoidal_Integrator(&pid->integrator, x);
+
+	// Расчёт дифференциальной части
+	float out_d = BackwardEuler_Diff(&pid->diff, x);
+	return LIMIT(out_p + out_i + out_d, pid->sat.min, pid->sat.max);
+}
+
+/**
+ * \brief Функция ПИД-регулятора с защитой от насыщения интегратора методом BackCalculation
+ */
+float PID_BackCalc_Controller(PID_Controller_Struct *pid, float x) {
+
+	// Расчёт пропорциональной части
+	float out_p = x * pid->kp;
+
+	// Расчёт интегральной части
+	float out_i = Trapezoidal_Integrator(&pid->integrator, x + pid->bc);
+
+	// Расчёт дифференциальной части
+	float out_d = BackwardEuler_Diff(&pid->diff, x);
+
+	// Выход регулятора до ограничения
+	float out = out_p + out_i + out_d;
+
+	// Выход регулятора после ограничителя
+	float out_limit = LIMIT(out, pid->sat.min, pid->sat.max);
+
+	// bc = (us - u) / Tt * kb
+	// kb = 1 / Tt / ki
+	pid-> bc = (out_limit - out) * pid->kb;
+	return out_limit;
+}
+
+
+/**
  * \brief Функция линейного задатчика
  * \param ramp: структура с параметрами задатчика
  * \param x: вход задатчика
  * \return y: выход задатчика
  */
-float LinearRamp(LinearRamp_Struct * ramp, float x){
+float LinearRamp(LinearRamp_Struct *ramp, float x) {
 
 	// s = x-r
 	float s = x - ramp->integrator.sum;
 
 	// Функция знака (sign)
-	if(signbit(s)) // Если s имеет знак минус (число отрицательное)
+	if (signbit(s)) // Если s имеет знак минус (число отрицательное)
 		s = -1.f;
 	else
 		s = 1.f;
@@ -194,25 +309,27 @@ float LinearRamp(LinearRamp_Struct * ramp, float x){
  * \param x: вход задатчика
  * \return y: выход задатчика
  */
-float SSHapedRamp(SSHapedRamp_Struct * ramp, float x){
+float SSHapedRamp(SSHapedRamp_Struct *ramp, float x) {
 
 	// s1 = x - (r +-k3 * p^2) = x-r -+k3 * p^2
-	float s1 = x - ramp->integrator[1].sum - ramp->k3 * ramp->integrator[0].sum * fabsf(ramp->integrator[0].sum);
+	float s1 = x - ramp->integrator[1].sum
+			- ramp->k3 * ramp->integrator[0].sum
+					* fabsf(ramp->integrator[0].sum);
 
 	// Функция знака (sign)
-	if(signbit(s1)) // Если s1 имеет знак минус (число отрицательное)
+	if (signbit(s1)) // Если s1 имеет знак минус (число отрицательное)
 		s1 = -1.f;
 	else
 		s1 = 1.f;
 
-	float s2 = s1 -ramp->k3 * ramp->integrator[0].sum;
+	float s2 = s1 - ramp->k3 * ramp->integrator[0].sum;
 
 	// Функция знака (sign)
-	if(signbit(s2)) // Если s2 имеет знак минус (число отрицательное)
+	if (signbit(s2)) // Если s2 имеет знак минус (число отрицательное)
 		s2 = -1.f;
 	else
 		s2 = 1.f;
 
-	float p =  BackwardEuler_Integrator(&ramp->integrator[0], s2);
-	 return BackwardEuler_Integrator(&ramp->integrator[1], p);
+	float p = BackwardEuler_Integrator(&ramp->integrator[0], s2);
+	return BackwardEuler_Integrator(&ramp->integrator[1], p);
 }
