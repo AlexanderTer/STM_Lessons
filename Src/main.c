@@ -48,9 +48,9 @@ int main(void) {
 
 	/* Loop forever */
 	for (;;) {
-		for (int i = 0; i < 100000; i++)
-			;
-		GPIOD->ODR ^= 1 << 1;
+		//for (int i = 0; i < 100000; i++)
+		//	;
+	//	GPIOD->ODR ^= 1 << 1;
 
 		// Проверяем PB1 (SW1) на ноль.
 		if (!(GPIOB->IDR & (1 << 1)))
@@ -59,7 +59,7 @@ int main(void) {
 		// Проверить PB2 (sw2) на ноль
 		if (!(GPIOB->IDR & (1 << 2))) {
 			extern float REF_CONTROLLER;
-			REF_CONTROLLER = 1.f;
+			REF_CONTROLLER = IL_REF1;
 
 			timer_PWM_On();
 		GPIOD->ODR &= ~((1<<2)|(1<<3)|(1<<4)|(1<<5));

@@ -3,7 +3,26 @@
 #include "dsp.h"
 #include "timer.h"
 
-Control_Struct Boost_Control;
+Control_Struct Boost_Control = {
+		.pid_current = {
+				// Пропорциональный коэффициент
+				.kp =  0.133399262551201,
+
+				.integrator = {
+
+						// Интегральный коэффициент
+						.k = 438.310314391716 * (TS / 2),
+						.sat = {.min = 0.02, .max = 0.98}
+				},
+				.diff = {
+
+						// Дифференциальный коэффициент
+						.k = 2.09748906707283e-7 * FS,
+				},
+				.sat = {.min = 0.02, .max = 0.98}
+		},
+
+};
 Measure_Struct Boost_Measure = {
 
 #define V25 0.76
@@ -32,8 +51,8 @@ Protect_Struct Boost_Protect = {
 		.u1_max = 90.,
 		.u2_max = 100.,
 
-		.iL_n = 2.,
-		.iL_int_max = 2. * 10.,
+		.iL_n = 6.,
+		.iL_int_max = 6. * 10.,
 
 		.sat = {
 				.duty_min = 0.02,
@@ -70,10 +89,10 @@ SSHapedRamp_Struct SSHAPED_RAMP =
 
 PID_Controller_Struct PID_CONTROLLER =
 {
-		.kp = 0.5,
+		.kp = 0.133399262551201,
 		.integrator =
 		{
-				.k = 0.5 / 0.05 * (TS / 2.),
+				.k =  438.310314391716 * TS,
 				.sat = { .min = 0., .max = 1. }
 		},
 		.sat = { .min = 0., .max = 1. },
@@ -81,7 +100,7 @@ PID_Controller_Struct PID_CONTROLLER =
 
 PID_Controller_Struct PID__BC_CONTROLLER =
 {
-		.kp = 0.5,
+		.kp = 0.133399262551201,
 		.kb = 0.05 / (0.5 / 0.05),
 		.integrator =
 		{
@@ -115,10 +134,17 @@ void DMA2_Stream0_IRQHandler(void) {
 
 	set_shifts();
 
-	// 0.4 Номинальный коэф
-	// 0.04 - 10% от номинального
-	// 1.65 Макс амплитуда переменной составляющей инжектируемого сигнала в [В]
-	Boost_Control.duty = 0.4f + Boost_Measure.data.inj * (0.004f / 1.65f);
+	// Линейный задатчик тока реактора
+	float il_ramp = LinearRamp(&LINEAR_RAMP, IL_REF1);
+
+	// Ошибка регулирования
+	float error = il_ramp - Boost_Measure.data.iL;
+
+	// Расчёт ПИД - регулятора
+	float PID_output = PID_Controller(&Boost_Control.pid_current, error);
+
+	Boost_Control.duty = PID_output;// + Boost_Measure.data.inj;
+
 	// Регистр сравнения: ARR * (коэффициент заполнения)
 		TIM8->CCR1 = TIM8->ARR * LIMIT(Boost_Control.duty, Boost_Protect.sat.duty_min,Boost_Protect.sat.duty_max);
 
@@ -126,10 +152,10 @@ void DMA2_Stream0_IRQHandler(void) {
 	unsigned int dac1, dac2;
 
 	//
-	Boost_Measure.dac[0].data = PID_Controller(&PID_CONTROLLER, REF_CONTROLLER);
+	Boost_Measure.dac[0].data = PID_output;
 
 	// Выводим переменную на ЦАП2
-	Boost_Measure.dac[1].data = PID_BackCalc_Controller(&PID__BC_CONTROLLER, REF_CONTROLLER);
+	Boost_Measure.dac[1].data = Boost_Control.duty;
 
 	// Фильтруем переменную
 	//dac2 = MovingFloatFilter(&FILTER_MOV, Boost_Measure.data.inj) * (4095.f / 100.f);
