@@ -30,6 +30,13 @@
 #include "control.h"
 
 int main(void) {
+
+	// Включаем модуль DWT и разблокируем доступ к счётчику тактов процессора (ядра)
+	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;			 // Armv7-M Architecture Reference Manual, p. C1-706.
+	DWT->LAR = 0xC5ACCE55; 						   			 // ARM CoreSight Architecture Specification (v3.0), p. B2-61.
+	DWT->CYCCNT = 0;       									 // Armv7-M Architecture Reference Manual, p. C1-731.
+	DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk; 					 // Armv7-M Architecture Reference Manual, p. C1-740.
+
 	// Global interrupt disable
 	__disable_irq();
 
@@ -41,7 +48,8 @@ int main(void) {
 	init_dac();
 	init_timer8();
 
-	for (int i = 0; i< 5000; i++);
+	for (int i = 0; i < 5000; i++)
+		;
 
 	// Global interrupt enable
 	__enable_irq();
@@ -50,7 +58,7 @@ int main(void) {
 	for (;;) {
 		//for (int i = 0; i < 100000; i++)
 		//	;
-	//	GPIOD->ODR ^= 1 << 1;
+		//	GPIOD->ODR ^= 1 << 1;
 
 		// Проверяем PB1 (SW1) на ноль.
 		if (!(GPIOB->IDR & (1 << 1)))
@@ -62,8 +70,8 @@ int main(void) {
 			REF_CONTROLLER = IL_REF1;
 
 			timer_PWM_On();
-		GPIOD->ODR &= ~((1<<2)|(1<<3)|(1<<4)|(1<<5));
-	}
+			GPIOD->ODR &= ~((1 << 2) | (1 << 3) | (1 << 4) | (1 << 5));
+		}
 
-}
+	}
 }

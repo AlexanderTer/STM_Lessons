@@ -26,7 +26,7 @@ DigitalFilter_Struct FILTER_DIG2 = { .b[0] = 0.993755964953657, .b[1
 		] = -1.925108587845861, .b[2] = 0.993755964953657, .a[0] = 1, .a[1
 		] = -1.925108587845860, .a[2] = 0.987511929907314, };
 
-float MovingFloatFilter(MovingFloatFilter_Struct *filter, float x) {
+inline float MovingFloatFilter(MovingFloatFilter_Struct *filter, float x) {
 
 	// Отнимаем от суммы [n-1] точку и прибавляем [0] точку
 	filter->sum = filter->sum - filter->buf[filter->pointer] + x;
@@ -51,7 +51,7 @@ int cmp(const void *a, const void *b) {
 
 }
 
-float MedianFloatFilter(MedianFloatFilter_Struct *filter, float x) {
+inline float MedianFloatFilter(MedianFloatFilter_Struct *filter, float x) {
 
 // Добавляем новую точку в массив точек
 	filter->buf[filter->pointer] = x;
@@ -78,7 +78,7 @@ float MedianFloatFilter(MedianFloatFilter_Struct *filter, float x) {
  * \brief Функция фильтра нижних частот первого порядка
  */
 
-float Low_Filter_1st_Order(Low_Filter_1st_Order_Struct *filter, float x) {
+inline float Low_Filter_1st_Order(Low_Filter_1st_Order_Struct *filter, float x) {
 
 	float y = x * filter->b0 - filter->yn * filter->a1;
 
@@ -94,7 +94,7 @@ float Low_Filter_1st_Order(Low_Filter_1st_Order_Struct *filter, float x) {
  * \param х: выходная переменная
  * \return y: значение после фильтрации
  */
-float DirectFormII_FloatFilter(DigitalFilter_Struct *filter, float x) {
+inline float DirectFormII_FloatFilter(DigitalFilter_Struct *filter, float x) {
 	float y = 0;
 
 	// w = x
@@ -118,7 +118,7 @@ float DirectFormII_FloatFilter(DigitalFilter_Struct *filter, float x) {
 	return y;
 }
 
-float DirectFormI_FloatFilter(DigitalFilter_Struct *filter, float x) {
+inline float DirectFormI_FloatFilter(DigitalFilter_Struct *filter, float x) {
 	filter->z[0][0] = x;
 	filter->z[1][0] = x * filter->b[0];
 
@@ -144,7 +144,7 @@ float DirectFormI_FloatFilter(DigitalFilter_Struct *filter, float x) {
  * \param x: вход интегратора
  * \return y: выход интегратора
  */
-float BackwardEuler_Integrator(Integrator_Struct *integrator, float x) {
+inline float BackwardEuler_Integrator(Integrator_Struct *integrator, float x) {
 
 	// Накапливаем сумму
 	integrator->sum = LIMIT(integrator->sum + integrator->k * x,
@@ -162,7 +162,7 @@ float BackwardEuler_Integrator(Integrator_Struct *integrator, float x) {
  * \param x: вход интегратора
  * \return y: выход интегратора
  */
-float BackwardEuler_Kahan_Integrator(Integrator_Struct *integrator, float x) {
+inline float BackwardEuler_Kahan_Integrator(Integrator_Struct *integrator, float x) {
 	// y = input - c
 	float y = integrator->k * x - integrator->c;
 
@@ -187,7 +187,7 @@ float BackwardEuler_Kahan_Integrator(Integrator_Struct *integrator, float x) {
  * \param x: вход интегратора
  * \return y: выход интегратора
  */
-float Trapezoidal_Integrator(Integrator_Struct *integrator, float x) {
+inline float Trapezoidal_Integrator(Integrator_Struct *integrator, float x) {
 
 	// y[n] = s[n-1] + x[n]*k
 	float out = LIMIT(integrator->sum + integrator->k * x, integrator->sat.min,
@@ -204,7 +204,7 @@ float Trapezoidal_Integrator(Integrator_Struct *integrator, float x) {
  * \param x: вход интегратора
  * \return y: выход интегратора
  */
-float Trapezoidal_Kahan_Integrator(Integrator_Struct *integrator, float x) {
+inline float Trapezoidal_Kahan_Integrator(Integrator_Struct *integrator, float x) {
 
 	// y[n] = s[n-1] + x[n]*k
 	float out = LIMIT(integrator->sum + integrator->k * x, integrator->sat.min,
@@ -232,7 +232,7 @@ float Trapezoidal_Kahan_Integrator(Integrator_Struct *integrator, float x) {
  * \param x: вход дифференциатора
  * \return y: выход дифференциатора
  */
-float BackwardEuler_Diff(Diff_Struct *diff, float x) {
+inline float BackwardEuler_Diff(Diff_Struct *diff, float x) {
 
 	// y[n] = (x[n] - x[n-1]) * k
 	float out = (x - diff->xz) * diff->k;
@@ -259,7 +259,7 @@ float PID_Controller(PID_Controller_Struct *pid, float x) {
 /**
  * \brief Функция ПИД-регулятора с защитой от насыщения интегратора методом BackCalculation
  */
-float PID_BackCalc_Controller(PID_Controller_Struct *pid, float x) {
+inline float PID_BackCalc_Controller(PID_Controller_Struct *pid, float x) {
 
 	// Расчёт пропорциональной части
 	float out_p = x * pid->kp;
@@ -289,7 +289,7 @@ float PID_BackCalc_Controller(PID_Controller_Struct *pid, float x) {
  * \param x: вход задатчика
  * \return y: выход задатчика
  */
-float LinearRamp(LinearRamp_Struct *ramp, float x) {
+inline float LinearRamp(LinearRamp_Struct *ramp, float x) {
 
 	// s = x-r
 	float s = x - ramp->integrator.sum;
@@ -309,7 +309,7 @@ float LinearRamp(LinearRamp_Struct *ramp, float x) {
  * \param x: вход задатчика
  * \return y: выход задатчика
  */
-float SSHapedRamp(SSHapedRamp_Struct *ramp, float x) {
+inline float SSHapedRamp(SSHapedRamp_Struct *ramp, float x) {
 
 	// s1 = x - (r +-k3 * p^2) = x-r -+k3 * p^2
 	float s1 = x - ramp->integrator[1].sum

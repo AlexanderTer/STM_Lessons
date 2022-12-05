@@ -111,6 +111,7 @@ PID_Controller_Struct PID__BC_CONTROLLER =
 };
 
 float REF_CONTROLLER = 0.;
+unsigned int TIC, TOC;
 
 
 volatile float TEMPERATURE;
@@ -121,6 +122,8 @@ void integral_protect(void);
 
 void timer_PWM_Off(void);
 void DMA2_Stream0_IRQHandler(void) {
+
+	TIC = DWT->CYCCNT;
 
 	// Сброс флага DMA2 по окончанию передачи данных
 	DMA2->LIFCR |= DMA_LIFCR_CTCIF0;
@@ -168,7 +171,7 @@ void DMA2_Stream0_IRQHandler(void) {
 
 	// Запись чисел в ЦАП1 и ЦАП2
 	DAC->DHR12RD = dac1 | (dac2 << 16);
-
+   TOC = DWT->CYCCNT - TIC;
 }
 
 /**
@@ -250,7 +253,7 @@ void integral_protect(void){
 	if (Boost_Protect.iL_int_sum < 0) Boost_Protect.iL_int_sum = 0;
 
 	// Проверяем условие срабаотывания защиты
-	if(Boost_Protect.iL_int_sum > Boost_Protect.iL_int_max){
+	else if(Boost_Protect.iL_int_sum > Boost_Protect.iL_int_max){
 		Boost_Protect.iL_int_sum = 0;
 		timer_PWM_Off();
 		GPIOD->ODR &= ~((1 << 2) | (1 << 3) | (1 << 4) | (1 << 5));

@@ -99,21 +99,21 @@ typedef struct {
 
 } SSHapedRamp_Struct; // Структура парметров S-образного задатчика
 
-float MovingFloatFilter(MovingFloatFilter_Struct *filter, float x);
-float MedianFloatFilter(MedianFloatFilter_Struct *filter, float x);
-float Low_Filter_1st_Order(Low_Filter_1st_Order_Struct *filter, float x);
-float DirectFormII_FloatFilter(DigitalFilter_Struct *filter, float x);
-float DirectFormI_FloatFilter(DigitalFilter_Struct *filter, float x);
-float LinearRamp(LinearRamp_Struct *ramp, float x);
-float SSHapedRamp(SSHapedRamp_Struct *ramp, float x);
+extern float MovingFloatFilter(MovingFloatFilter_Struct *filter, float x);
+extern float MedianFloatFilter(MedianFloatFilter_Struct *filter, float x);
+extern float Low_Filter_1st_Order(Low_Filter_1st_Order_Struct *filter, float x);
+extern float DirectFormII_FloatFilter(DigitalFilter_Struct *filter, float x);
+extern float DirectFormI_FloatFilter(DigitalFilter_Struct *filter, float x);
+extern float LinearRamp(LinearRamp_Struct *ramp, float x);
+extern float SSHapedRamp(SSHapedRamp_Struct *ramp, float x);
 
-float BackwardEuler_Integrator(Integrator_Struct *integrator, float x);
-float BackwardEuler_Kahan_Integrator(Integrator_Struct *integrator, float x);
-float Trapezoidal_Integrator(Integrator_Struct *integrator, float x);
-float Trapezoidal_Kahan_Integrator(Integrator_Struct *integrator, float x);
-float BackwardEuler_Diff(Diff_Struct * diff, float x);
-float PID_Controller(PID_Controller_Struct * pid, float x);
-float PID_BackCalc_Controller(PID_Controller_Struct *pid, float x);
+extern float BackwardEuler_Integrator(Integrator_Struct *integrator, float x);
+extern float BackwardEuler_Kahan_Integrator(Integrator_Struct *integrator, float x);
+extern float Trapezoidal_Integrator(Integrator_Struct *integrator, float x);
+extern float Trapezoidal_Kahan_Integrator(Integrator_Struct *integrator, float x);
+extern float BackwardEuler_Diff(Diff_Struct * diff, float x);
+extern float PID_Controller(PID_Controller_Struct * pid, float x);
+extern float PID_BackCalc_Controller(PID_Controller_Struct *pid, float x);
 
 extern MovingFloatFilter_Struct FILTER_MOV;
 extern MedianFloatFilter_Struct FILTER_MED;
