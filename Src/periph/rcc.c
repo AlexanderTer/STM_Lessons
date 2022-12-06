@@ -18,6 +18,8 @@ void init_RCC(void) {
 	SCB_InvalidateICache();
 	    SCB_EnableICache();
 
+	    //SCB_InvalidateDCache();
+	  //  SCB_EnableDCache();
 	// Обновление переменной с частотой тактирования
 
 	SystemCoreClockUpdate();

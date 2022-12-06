@@ -36,9 +36,10 @@ int main(void) {
 	init_interrupt();
 	init_RCC();
 	init_GPIO();
+	init_dac();
 	init_dma();
 	init_adc();
-	init_dac();
+
 	init_timer8();
 
 	for (int i = 0; i< 5000; i++);

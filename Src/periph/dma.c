@@ -1,7 +1,7 @@
 #include "dma.h"
 #include "stm32f7xx.h"
 
-volatile unsigned int ADC_Buffer[6];
+volatile unsigned int ADC_Buffer[6] __attribute((section(".adc_buf")));
 
 void init_dma(void) {
 

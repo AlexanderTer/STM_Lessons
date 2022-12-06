@@ -115,10 +115,6 @@ float BackwardEuler_Diff(Diff_Struct * diff, float x);
 float PID_Controller(PID_Controller_Struct * pid, float x);
 float PID_BackCalc_Controller(PID_Controller_Struct *pid, float x);
 
-extern MovingFloatFilter_Struct FILTER_MOV;
-extern MedianFloatFilter_Struct FILTER_MED;
-extern Low_Filter_1st_Order_Struct FILTER_1ORD;
-extern DigitalFilter_Struct FILTER_DIG1;
-extern DigitalFilter_Struct FILTER_DIG2;
+
 
 #endif

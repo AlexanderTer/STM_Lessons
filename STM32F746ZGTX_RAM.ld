@@ -44,8 +44,10 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Memories definition */
 MEMORY
 {
-  RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 320K
+  RAM    (xrw)    : ORIGIN = 0x20000000 + 24,   LENGTH = 320K - 24
   FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 1024K
+  ADC_BUF   (xrw) : ORIGIN = 0x20000000,    LENGTH = 24
+  
 }
 
 /* Sections */
@@ -182,4 +184,7 @@ SECTIONS
   }
 
   .ARM.attributes 0 : { *(.ARM.attributes) }
+  .adc_buf : { *(.adc_buf) } >ADC_BUF
+  
+  
 }
