@@ -59,8 +59,8 @@ int main(void) {
 
 		// Проверить PB2 (sw2) на ноль
 		if (!(GPIOB->IDR & (1 << 2))) {
-			extern float REF_CONTROLLER;
-			REF_CONTROLLER = IL_REF1;
+			//extern float REF_CONTROLLER;
+			//REF_CONTROLLER = IL_REF1;
 
 			timer_PWM_On();
 		GPIOD->ODR &= ~((1<<2)|(1<<3)|(1<<4)|(1<<5));

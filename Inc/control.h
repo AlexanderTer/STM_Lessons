@@ -11,6 +11,7 @@ typedef struct {
 
 	float duty; // Коэффициент заполнения, [0..1]
 	PID_Controller_Struct pid_current;// Структура регулятора тока реактора
+	PID_Controller_Struct pid_voltage;// Структура регулятора напряжения
 
 } Control_Struct; // Структура с параметрами системы кправления
 

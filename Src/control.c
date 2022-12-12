@@ -12,15 +12,33 @@ Control_Struct Boost_Control = {
 
 						// Интегральный коэффициент
 						.k = 471.19 * (TS / 2),
-						.sat = {.min = 0.02, .max = 0.98}
+						.sat = {.min = 0, .max = 0.98}
 				},
 				.diff = {
 
 						// Дифференциальный коэффициент
 						.k = 0 * FS,
 				},
-				.sat = {.min = 0.02, .max = 0.98}
+				.sat = {.min = 0, .max = 0.98}
 		},
+
+		.pid_voltage = {
+						// Пропорциональный коэффициент
+						.kp =   1.0130,
+
+						.integrator = {
+
+								// Интегральный коэффициент
+								.k = 2530.6 * (TS / 2),
+								.sat = {.min = 0, .max = 7}
+						},
+						.diff = {
+
+								// Дифференциальный коэффициент
+								.k =  0* FS,
+						},
+						.sat = {.min = -7, .max = 7}
+				},
 
 };
 Measure_Struct Boost_Measure = {
@@ -42,7 +60,7 @@ Measure_Struct Boost_Measure = {
 
 		.dac[0] = {.shift = 0., .scale = 4095./5. },
 
-		.dac[1] = {.shift = 0, .scale = 4095.},
+		.dac[1] = {.shift = 0, .scale = 4095./5.},
 };
 
 Protect_Struct Boost_Protect = {
@@ -88,7 +106,8 @@ SSHapedRamp_Struct SSHAPED_RAMP =
 };
 
 
-float REF_CONTROLLER = 0.;
+float REF_CURRENT = 0.;
+float REF_VOLTAGE = 97.;
 
 
 volatile float TEMPERATURE;
@@ -114,38 +133,50 @@ void DMA2_Stream0_IRQHandler(void) {
 
 	set_shifts();
 
-	static unsigned int cnt = 0; // 50 = 0.01 / 2 * Fs
-	cnt++;
-	if (cnt < 50)
-		REF_CONTROLLER = 3.5f;
-	else if (cnt < 100)
-		REF_CONTROLLER = 4.5f;
-	else
-		cnt = 0;
+//	static unsigned int cnt = 0; // 50 = 0.01 / 2 * Fs
+//	cnt++;
+//	if (cnt < 50)
+//		REF_CONTROLLER = 3.5f;
+//	else if (cnt < 100)
+//		REF_CONTROLLER = 4.5f;
+//	else
+//		cnt = 0;
 
-
+// Voltage loop calculate
+	// Ошибка регулирования по напряжению
+	float error_Voltage = REF_VOLTAGE -  Boost_Measure.data.u2;
+	// Расчёт ПИД - регулятора
+     REF_CURRENT = PID_Controller(&Boost_Control.pid_voltage, error_Voltage) + Boost_Measure.data.inj * (0.0f / 1.65f );
 	// Уставка на ток реактора = 4А
 	//REF_CONTROLLER = 3.5f + Boost_Measure.data.inj * (0.4f / 1.65f );
 
 	// Ошибка регулирования
-	float error = REF_CONTROLLER - Boost_Measure.data.iL;
+	float error_current = REF_CURRENT - Boost_Measure.data.iL;
+
 
 	// Расчёт ПИД - регулятора
-	float PID_output = PID_Controller(&Boost_Control.pid_current, error);
-
+	float PID_output = PID_Controller(&Boost_Control.pid_current, error_current);
 	Boost_Control.duty = PID_output;
 
+	// Холостой ход (Burst mode)
+	if ((Boost_Control.duty < Boost_Protect.sat.duty_min) || (REF_CURRENT < 0))
+		TIM8->CCR1 = 0;
+	else if(Boost_Control.duty > Boost_Protect.sat.duty_max )
+		TIM8->CCR1 = TIM8->ARR * Boost_Protect.sat.duty_max;
+	else
+		TIM8->CCR1 = TIM8->ARR * Boost_Control.duty;
+
 	// Регистр сравнения: ARR * (коэффициент заполнения)
-		TIM8->CCR1 = TIM8->ARR * LIMIT(Boost_Control.duty, Boost_Protect.sat.duty_min,Boost_Protect.sat.duty_max);
+		// TIM8->CCR1 = TIM8->ARR * LIMIT(Boost_Control.duty, Boost_Protect.sat.duty_min,Boost_Protect.sat.duty_max);
 
 	/* Вывод сигнала на цап*/
 	unsigned int dac1, dac2;
 
 	//
-	Boost_Measure.dac[0].data =  REF_CONTROLLER;
+	Boost_Measure.dac[0].data =  REF_CURRENT;
 
 	// Выводим переменную на ЦАП2
-	Boost_Measure.dac[1].data = Boost_Control.duty;
+	Boost_Measure.dac[1].data = REF_CURRENT - Boost_Measure.data.inj * (0.0f / 1.65f );
 
 	// Фильтруем переменную
 	//dac2 = MovingFloatFilter(&FILTER_MOV, Boost_Measure.data.inj) * (4095.f / 100.f);
