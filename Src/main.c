@@ -41,8 +41,10 @@ int main(void) {
 	init_dac();
 	init_dma();
 	init_adc();
-
 	init_timer8();
+
+	// Инициализация FFT (динамическое выделение памяти для нужд FFT)
+	FFT_CFG = kiss_fftr_alloc(FFT_SIZE, 0, NULL, NULL);
 
 	for (int i = 0; i < 5000; i++)
 		;

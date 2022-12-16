@@ -2,43 +2,33 @@
 #include "control.h"
 #include "dsp.h"
 #include "timer.h"
+#include "kiss_fftr.h"
 
-Control_Struct Boost_Control = {
-		.pid_current = {
-				// Пропорциональный коэффициент
-				.kp =  0.055769,
+Control_Struct Boost_Control = { .pid_current = {
+		// Пропорциональный коэффициент
+		.kp = 0.055769,
 
-				.integrator = {
+		.integrator = {
 
-						// Интегральный коэффициент
-						.k = 471.19 * (TS / 2),
-						.sat = {.min = 0, .max = 0.98}
-				},
-				.diff = {
+		// Интегральный коэффициент
+				.k = 471.19 * (TS / 2), .sat = { .min = 0, .max = 0.98 } },
+		.diff = {
 
-						// Дифференциальный коэффициент
-						.k = 0 * FS,
-				},
-				.sat = {.min = 0, .max = 0.98}
-		},
+		// Дифференциальный коэффициент
+				.k = 0 * FS, }, .sat = { .min = 0, .max = 0.98 } },
 
-		.pid_voltage = {
-						// Пропорциональный коэффициент
-						.kp =   1.0130,
+.pid_voltage = {
+// Пропорциональный коэффициент
+		.kp = 1.0130,
 
-						.integrator = {
+		.integrator = {
 
-								// Интегральный коэффициент
-								.k = 2530.6 * (TS / 2),
-								.sat = {.min = 0, .max = 7}
-						},
-						.diff = {
+		// Интегральный коэффициент
+				.k = 2530.6 * (TS / 2), .sat = { .min = 0, .max = 7 } }, .diff =
+				{
 
-								// Дифференциальный коэффициент
-								.k =  0* FS,
-						},
-						.sat = {.min = -7, .max = 7}
-				},
+				// Дифференциальный коэффициент
+						.k = 0 * FS, }, .sat = { .min = -7, .max = 7 } },
 
 };
 Measure_Struct Boost_Measure = {
@@ -48,67 +38,44 @@ Measure_Struct Boost_Measure = {
 
 		.shift = {
 				.inj = 0,		// Устанавливается по нажатию SW1
-				.u2 = 100.4, .iL = 0,
-				.temperature = 25.f - V25 / AV_SLOPE,
+				.u2 = 100.4, .iL = 0, .temperature = 25.f - V25 / AV_SLOPE,
 				.u1 = 0, .in = 0 },
 
-		.scale = { .inj = 3.3 / 4095.,
-				.u2 = -0.001880341880341881, .iL =
-				1.9794e-03, .temperature = 3.3 / (4095. * AV_SLOPE),
-				.u1 = 0.024982,
-				.in = 9.8970e-04 },
+		.scale = { .inj = 3.3 / 4095., .u2 = -0.001880341880341881, .iL =
+				1.9794e-03, .temperature = 3.3 / (4095. * AV_SLOPE), .u1 =
+				0.024982, .in = 9.8970e-04 },
 
-		.dac[0] = {.shift = 0., .scale = 4095./5. },
+		.dac[0] = { .shift = 0., .scale = 4095. / 5. },
 
-		.dac[1] = {.shift = 0, .scale = 4095./5.},
-};
+		.dac[1] = { .shift = 0, .scale = 4095. / 5. }, };
 
-Protect_Struct Boost_Protect = {
-		.iL_max = 8.,
-		.in_max = 3.,
-		.u1_max = 90.,
+Protect_Struct Boost_Protect = { .iL_max = 8., .in_max = 3., .u1_max = 90.,
 		.u2_max = 100.,
 
-		.iL_n = 6.,
-		.iL_int_max = 6. * 10.,
+		.iL_n = 6., .iL_int_max = 6. * 10.,
 
-		.sat = {
-				.duty_min = 0.02,
-				.duty_max = 0.98,
-		},
-};
+		.sat = { .duty_min = 0.02, .duty_max = 0.98, }, };
 
+LinearRamp_Struct LINEAR_RAMP = { .integrator = { .k = 0.25 * TS, .sat = {
+		.min = -999999., .max = 999999. }, }, };
 
-LinearRamp_Struct LINEAR_RAMP =
-{
-		.integrator =
-		{
-				.k = 0.25 * TS,
-				.sat = {.min = -999999., .max = 999999.},
-		},
-};
+SSHapedRamp_Struct SSHAPED_RAMP = { .integrator[0] =
+{ .k = 1. * TS, .sat = { .min = -999999., .max = 999999. } },
 
-SSHapedRamp_Struct SSHAPED_RAMP =
-{
-		.integrator[0] =
-		{
-				.k = 1.*TS,
-				.sat = { .min = -999999., .max = 999999.}
-		},
-
-		.integrator[1] =
-		{
-				.k = 0.25 *TS,
-				.sat = { .min = -999999., .max = 999999.}
-		},
-		.k3 = 0.125
+.integrator[1] =
+{ .k = 0.25 * TS, .sat = { .min = -999999., .max = 999999. } }, .k3 = 0.125
 
 };
 
+kiss_fftr_cfg FFT_CFG;
+kiss_fft_scalar FFT_INPUT[FFT_SIZE];
+kiss_fft_cpx FFT_OUTPUT[FFT_SIZE / 2 + 1];
+
+float AMPLITUDES[FFT_SIZE / 2 + 1];
+float FREQ[FFT_SIZE / 2 + 1];
 
 float REF_CURRENT = 0.;
 float REF_VOLTAGE = 97.;
-
 
 volatile float TEMPERATURE;
 void shift_and_scale(void);
@@ -119,8 +86,6 @@ void integral_protect(void);
 void timer_PWM_Off(void);
 void DMA2_Stream0_IRQHandler(void) {
 
-
-
 	// Сброс флага DMA2 по окончанию передачи данных
 	DMA2->LIFCR |= DMA_LIFCR_CTCIF0;
 
@@ -129,66 +94,27 @@ void DMA2_Stream0_IRQHandler(void) {
 
 	shift_and_scale();
 
-	protect_software();
+	static int n = 0;
 
-	set_shifts();
+// Наполняем входной буфер (массив) для FFT
+	FFT_INPUT[n++] = Boost_Measure.data.inj;
 
-//	static unsigned int cnt = 0; // 50 = 0.01 / 2 * Fs
-//	cnt++;
-//	if (cnt < 50)
-//		REF_CONTROLLER = 3.5f;
-//	else if (cnt < 100)
-//		REF_CONTROLLER = 4.5f;
-//	else
-//		cnt = 0;
+// Проверка наполнения буфера
+	if (n == FFT_SIZE) {
 
-// Voltage loop calculate
-	// Ошибка регулирования по напряжению
-	float error_Voltage = REF_VOLTAGE -  Boost_Measure.data.u2;
-	// Расчёт ПИД - регулятора
-     REF_CURRENT = PID_Controller(&Boost_Control.pid_voltage, error_Voltage) + Boost_Measure.data.inj * (0.0f / 1.65f );
-	// Уставка на ток реактора = 4А
-	//REF_CONTROLLER = 3.5f + Boost_Measure.data.inj * (0.4f / 1.65f );
+		// Расчёт FFT
+		kiss_fftr(FFT_CFG, FFT_INPUT, FFT_OUTPUT);
 
-	// Ошибка регулирования
-	float error_current = REF_CURRENT - Boost_Measure.data.iL;
+		// Вычисление модуля
+		AMPLITUDES[0] = FFT_OUTPUT[0].r * (1.f / FFT_SIZE);
 
+		for (int i = 1; i < FFT_SIZE / 2 + 1; i++) {
+          AMPLITUDES[i] = sqrtf (FFT_OUTPUT[i].r * FFT_OUTPUT[i].r + FFT_OUTPUT[i].i * FFT_OUTPUT[i].i) * (2.f / FFT_SIZE);
+          FREQ[i]= FS / FFT_SIZE * i;
+		}
+		n = 0;
 
-	// Расчёт ПИД - регулятора
-	float PID_output = PID_Controller(&Boost_Control.pid_current, error_current);
-	Boost_Control.duty = PID_output;
-
-	// Холостой ход (Burst mode)
-	if ((Boost_Control.duty < Boost_Protect.sat.duty_min) || (REF_CURRENT < 0))
-		TIM8->CCR1 = 0;
-	else if(Boost_Control.duty > Boost_Protect.sat.duty_max )
-		TIM8->CCR1 = TIM8->ARR * Boost_Protect.sat.duty_max;
-	else
-		TIM8->CCR1 = TIM8->ARR * Boost_Control.duty;
-
-	// Регистр сравнения: ARR * (коэффициент заполнения)
-		// TIM8->CCR1 = TIM8->ARR * LIMIT(Boost_Control.duty, Boost_Protect.sat.duty_min,Boost_Protect.sat.duty_max);
-
-	/* Вывод сигнала на цап*/
-	unsigned int dac1, dac2;
-
-	//
-	Boost_Measure.dac[0].data =  REF_CURRENT;
-
-	// Выводим переменную на ЦАП2
-	Boost_Measure.dac[1].data = REF_CURRENT - Boost_Measure.data.inj * (0.0f / 1.65f );
-
-	// Фильтруем переменную
-	//dac2 = MovingFloatFilter(&FILTER_MOV, Boost_Measure.data.inj) * (4095.f / 100.f);
-
-	// Пересчитываем внутренние переменные в значения регистров ЦАП1 и ЦАП2
-	dac1 = Boost_Measure.dac[0].scale * Boost_Measure.dac[0].data
-			+ Boost_Measure.dac[0].shift;
-	dac2 = Boost_Measure.dac[1].scale * Boost_Measure.dac[1].data
-			+ Boost_Measure.dac[1].shift;
-
-	// Запись чисел в ЦАП1 и ЦАП2
-	DAC->DHR12RD = dac1 | (dac2 << 16);
+	}
 
 }
 
@@ -259,7 +185,7 @@ void protect_software(void) {
 /**
  * \brief Функция интегрально-токовой защиты по току реактора
  */
-void integral_protect(void){
+void integral_protect(void) {
 
 	// Разница между током реатора и его номинальным значением
 	float x = Boost_Measure.data.iL - Boost_Protect.iL_n;
@@ -268,10 +194,11 @@ void integral_protect(void){
 	Boost_Protect.iL_int_sum = Boost_Protect.iL_int_sum + x * TS;
 
 	// Обнуляем интегратор в нормальном режиме работы
-	if (Boost_Protect.iL_int_sum < 0) Boost_Protect.iL_int_sum = 0;
+	if (Boost_Protect.iL_int_sum < 0)
+		Boost_Protect.iL_int_sum = 0;
 
 	// Проверяем условие срабаотывания защиты
-	if(Boost_Protect.iL_int_sum > Boost_Protect.iL_int_max){
+	if (Boost_Protect.iL_int_sum > Boost_Protect.iL_int_max) {
 		Boost_Protect.iL_int_sum = 0;
 		timer_PWM_Off();
 		GPIOD->ODR &= ~((1 << 2) | (1 << 3) | (1 << 4) | (1 << 5));
@@ -279,11 +206,10 @@ void integral_protect(void){
 	}
 }
 
-
 /**
  *  \brief Функция обработчик прерывания EXTI1 (1 линия), PB1.
  */
-void EXTI1_IRQHandler(void){
+void EXTI1_IRQHandler(void) {
 
 	// Сброс флага прерывания EXTI1.
 	EXTI->PR |= EXTI_PR_PR1;
@@ -294,6 +220,5 @@ void EXTI1_IRQHandler(void){
 	//	timer_PWM_Off();
 	//else
 	//	timer_PWM_On();
-
 
 }

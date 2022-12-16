@@ -9,24 +9,24 @@
  * \param y: арксинус аргумента
  */
 
-float asine_f32(float x) {
-	// Масштабируем аргумент к диапазону [0 1]
- float in = (x + 1.f) * 0.5f;
-
- // Масштабируем к диапазону [0 C_MATH_TABLE_SIZE-1]
- float findex = in * (C_MATH_TABLE_SIZE - 1);
-
- // Получаем целый индекс
- unsigned int index = (unsigned int)findex;
-
-
- float a = asineTable_f32[index];
- float b = asineTable_f32[index + 1];
-
- float c = (b - a) * (findex - index) + a
-
- return c;
-}
+//float asine_f32(float x) {
+//	// Масштабируем аргумент к диапазону [0 1]
+// float in = (x + 1.f) * 0.5f;
+//
+// // Масштабируем к диапазону [0 C_MATH_TABLE_SIZE-1]
+// float findex = in * (C_MATH_TABLE_SIZE - 1);
+//
+// // Получаем целый индекс
+// unsigned int index = (unsigned int)findex;
+//
+//
+// float a = asineTable_f32[index];
+// float b = asineTable_f32[index + 1];
+//
+// float c = (b - a) * (findex - index) + a;
+//
+// return c;
+//}
 
 // Предварительно рассчитаная таблица значений арксинуса для аргументов [-1 1]
 const float asineTable_32[C_MATH_TABLE_SIZE] = { -1.5708f, -1.4823f, -1.4456f, -1.4174f,

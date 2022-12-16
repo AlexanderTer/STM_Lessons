@@ -2,10 +2,13 @@
 #define __CONTROL_H__
 
 #include "dsp.h"
+#include "kiss_fftr.h"
 #define SET_SHIFTS_MAX_COUNT ((unsigned int)(0.5 * 100.e3))
 
 #define IL_REF1 (2.f)
 #define IL_REF2 (3.f)
+
+#define FFT_SIZE (1000) // Количество точек на периоде расчёта FFT
 
 typedef struct {
 
@@ -62,5 +65,6 @@ typedef struct {
 extern Control_Struct Boost_Control;
 extern Measure_Struct Boost_Measure;
 extern Protect_Struct Boost_Protect;
+extern kiss_fftr_cfg FFT_CFG;
 
 #endif
