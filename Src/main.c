@@ -16,7 +16,9 @@
  ******************************************************************************
  */
 #include <stdint.h>
+#include <math.h>
 #include "stm32f7xx.h"
+#include "arm_math.h"
 
 #include "rcc.h"
 #include "gpio.h"
@@ -42,7 +44,8 @@ int main(void) {
 
 	init_timer8();
 
-	for (int i = 0; i< 5000; i++);
+	for (int i = 0; i < 5000; i++)
+		;
 
 	// Global interrupt enable
 	__enable_irq();
@@ -51,7 +54,7 @@ int main(void) {
 	for (;;) {
 		//for (int i = 0; i < 100000; i++)
 		//	;
-	//	GPIOD->ODR ^= 1 << 1;
+		//	GPIOD->ODR ^= 1 << 1;
 
 		// Проверяем PB1 (SW1) на ноль.
 		if (!(GPIOB->IDR & (1 << 1)))
@@ -63,8 +66,13 @@ int main(void) {
 			//REF_CONTROLLER = IL_REF1;
 
 			timer_PWM_On();
-		GPIOD->ODR &= ~((1<<2)|(1<<3)|(1<<4)|(1<<5));
-	}
+			GPIOD->ODR &= ~((1 << 2) | (1 << 3) | (1 << 4) | (1 << 5));
+		}
 
+	}
 }
-}
+
+
+
+
+
