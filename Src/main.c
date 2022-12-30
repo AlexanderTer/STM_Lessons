@@ -28,7 +28,7 @@
 #include "dma.h"
 #include "dac.h"
 #include "dsp.h"
-
+#include "uart.h"
 #include "control.h"
 
 int main(void) {
@@ -43,6 +43,7 @@ int main(void) {
 	init_adc();
 
 	init_timer8();
+	init_uart();
 
 	for (int i = 0; i < 5000; i++)
 		;
@@ -64,6 +65,11 @@ int main(void) {
 		if (!(GPIOB->IDR & (1 << 2))) {
 			//extern float REF_CONTROLLER;
 			//REF_CONTROLLER = IL_REF1;
+
+			PID_RESET
+
+
+
 
 			timer_PWM_On();
 			GPIOD->ODR &= ~((1 << 2) | (1 << 3) | (1 << 4) | (1 << 5));

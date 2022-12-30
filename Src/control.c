@@ -48,12 +48,14 @@ Measure_Struct Boost_Measure = {
 
 		.shift = {
 				.inj = 0,		// Устанавливается по нажатию SW1
-				.u2 = 100.4, .iL = 0,
+				.u2 = 100.4,
+				.iL = 0,
 				.temperature = 25.f - V25 / AV_SLOPE,
 				.u1 = 0, .in = 0 },
 
 		.scale = { .inj = 3.3 / 4095.,
-				.u2 = -0.001880341880341881, .iL =
+				.u2 = -0.001880341880341881,
+				.iL =
 				1.9794e-03, .temperature = 3.3 / (4095. * AV_SLOPE),
 				.u1 = 0.024982,
 				.in = 9.8970e-04 },
@@ -105,6 +107,8 @@ SSHapedRamp_Struct SSHAPED_RAMP =
 
 };
 
+// Усредняющий фильтр выходного тока
+MovingFloatFilter_Struct IN_FILTER;
 
 float REF_CURRENT = 0.;
 float REF_VOLTAGE = 97.;
@@ -133,6 +137,9 @@ void DMA2_Stream0_IRQHandler(void) {
 
 	set_shifts();
 
+	// Усреднение выходного тока
+	Boost_Measure.data.in_av = MovingFloatFilter(&IN_FILTER, Boost_Measure.data.in);
+
 //	static unsigned int cnt = 0; // 50 = 0.01 / 2 * Fs
 //	cnt++;
 //	if (cnt < 50)
@@ -144,7 +151,7 @@ void DMA2_Stream0_IRQHandler(void) {
 
 // Voltage loop calculate
 	// Ошибка регулирования по напряжению
-	float error_Voltage = REF_VOLTAGE -  Boost_Measure.data.u2;
+	float error_Voltage = U_REF -  Boost_Measure.data.u2 + Boost_Measure.data.in_av * R_COMP;
 	// Расчёт ПИД - регулятора
      REF_CURRENT = PID_Controller(&Boost_Control.pid_voltage, error_Voltage) + Boost_Measure.data.inj * (0.0f / 1.65f );
 	// Уставка на ток реактора = 4А

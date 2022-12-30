@@ -27,6 +27,32 @@ int cmp(const void *a, const void *b) {
 	return 0;
 
 }
+/**
+ * \brief		Функция фильтра скользящего среднего
+ *
+ * \param		filter: структура с параметрами фильтра
+ * \param		x: входная переменная
+ *
+ * \return		y: среднее значение
+ *
+ */
+
+float MovingFloatFilter(MovingFloatFilter_Struct * filter, float x)
+{
+
+	// Отнимаем от суммы [n-1] точку и прибавляем [0] точку
+	filter->sum = filter->sum - filter->buf[filter->pointer] + x;
+
+	// Добавляем новую точку в массив точек
+	filter->buf[filter->pointer] = x;
+
+	// Инкрементируем указатель (счетчик)
+	if (++filter->pointer >= MAX_MOVING_FLOAT_SIZE)
+		filter->pointer = 0;
+
+	// Вычисляем среднее значение
+	return filter->sum *(1.f / MAX_MOVING_FLOAT_SIZE);
+}
 
 float MedianFloatFilter(MedianFloatFilter_Struct *filter, float x) {
 

@@ -4,8 +4,17 @@
 #include "dsp.h"
 #define SET_SHIFTS_MAX_COUNT ((unsigned int)(0.5 * 100.e3))
 
+// Уставка на выходное напряжение
+#define U_REF (98.f)
+
 #define IL_REF1 (2.f)
 #define IL_REF2 (3.f)
+
+// Компенсируемое сопротивление
+#define R_COMP (0.47f)
+
+// Макрос для сбросаПИД-регулятора
+#define PID_RESET(pid) (pid->integrator.sum = 0, pid->diff.xz = 0)
 
 typedef struct {
 
@@ -27,6 +36,7 @@ typedef struct {
 		float temperature;  // Температура
 		float u1; 			// Входное напряжение
 		float in; 			// Выходной ток
+		float in_av; //Усреднённый ток после фильтра
 	} data, shift, scale, sum; 	// data - рассчитанное значение
 	// shift - смещение значения
 	// scale - коэффициент масштабироания

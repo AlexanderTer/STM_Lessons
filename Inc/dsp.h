@@ -1,8 +1,8 @@
 #ifndef  __DSP_H__
 #define __DSP_H__
 
-#define MAX_MOVING_FLOAT_SIZE 500
-#define MAX_MEDIAN_FLOAT_SIZE 500
+#define MAX_MOVING_FLOAT_SIZE (10000) // Period = SIZE / FS, [c]
+#define MAX_MEDIAN_FLOAT_SIZE (500)
 #define MAX_ORDER_DIGITAL_FILTER (2)
 
 #define FS (100000.) // Частота дискретизации
