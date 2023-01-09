@@ -1,3 +1,10 @@
-../Src/control.c:28:6:DMA2_Stream0_IRQHandler	16	static,ignoring_inline_asm
-../Src/control.c:67:6:shift_and_scale	4	static
-../Src/control.c:84:6:set_shifts	4	static
+../Src/control.c:87:6:DMA2_Stream0_IRQHandler	32	static,ignoring_inline_asm
+../Src/control.c:179:6:shift_and_scale	4	static
+../Src/control.c:196:6:set_shifts	4	static
+../Src/control.c:214:6:protect_software	8	static
+../Src/control.c:243:6:integral_protect	24	static
+../Src/control.c:268:6:master_receive	16	static
+../Src/control.c:281:6:master_transmit	16	static
+../Src/control.c:301:6:slave_receive	16	static
+../Src/control.c:318:6:slave_transmit	16	static
+../Src/control.c:335:6:EXTI1_IRQHandler	4	static,ignoring_inline_asm

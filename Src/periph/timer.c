@@ -38,6 +38,20 @@ void init_timer8(void) {
 
 }
 
+void init_TIMER1(void){
+	// Включение тактирования модуля таймер8
+		RCC->APB2ENR |= RCC_APB2ENR_TIM8EN;
+
+		// Предделитель таймера 2
+		// Макс счёт 43200 (2.5 кгц)
+		TIM1->PSC = 1;
+		TIM1->ARR = 216000000 / 2500 - 1;
+		// Вкл прерывания по обновлению
+		TIM1->DIER |= TIM_DIER_UIE;
+		// Вкл счёт таймера
+		TIM1->CR1 |= TIM_CR1_CEN;
+}
+
 // Функция включения ШИМ таймера 8
 void timer_PWM_On(void) {
 

@@ -2,43 +2,37 @@
 #include "control.h"
 #include "dsp.h"
 #include "timer.h"
+#include "crc.h"
+#include "uart.h"
 
-Control_Struct Boost_Control = {
-		.pid_current = {
-				// Пропорциональный коэффициент
-				.kp =  0.055769,
 
-				.integrator = {
 
-						// Интегральный коэффициент
-						.k = 471.19 * (TS / 2),
-						.sat = {.min = 0, .max = 0.98}
-				},
-				.diff = {
 
-						// Дифференциальный коэффициент
-						.k = 0 * FS,
-				},
-				.sat = {.min = 0, .max = 0.98}
-		},
+Control_Struct Boost_Control = { .pid_current = {
+		// Пропорциональный коэффициент
+		.kp = 0.055769,
 
-		.pid_voltage = {
-						// Пропорциональный коэффициент
-						.kp =   1.0130,
+		.integrator = {
 
-						.integrator = {
+		// Интегральный коэффициент
+				.k = 471.19 * (TS / 2), .sat = { .min = 0, .max = 0.98 } },
+		.diff = {
 
-								// Интегральный коэффициент
-								.k = 2530.6 * (TS / 2),
-								.sat = {.min = 0, .max = 7}
-						},
-						.diff = {
+		// Дифференциальный коэффициент
+				.k = 0 * FS, }, .sat = { .min = 0, .max = 0.98 } },
 
-								// Дифференциальный коэффициент
-								.k =  0* FS,
-						},
-						.sat = {.min = -7, .max = 7}
-				},
+.pid_voltage = {
+// Пропорциональный коэффициент
+		.kp = 1.0130,
+
+		.integrator = {
+
+		// Интегральный коэффициент
+				.k = 2530.6 * (TS / 2), .sat = { .min = 0, .max = 7 } }, .diff =
+				{
+
+				// Дифференциальный коэффициент
+						.k = 0 * FS, }, .sat = { .min = -7, .max = 7 } },
 
 };
 Measure_Struct Boost_Measure = {
@@ -48,62 +42,32 @@ Measure_Struct Boost_Measure = {
 
 		.shift = {
 				.inj = 0,		// Устанавливается по нажатию SW1
-				.u2 = 100.4,
-				.iL = 0,
-				.temperature = 25.f - V25 / AV_SLOPE,
+				.u2 = 100.4, .iL = 0, .temperature = 25.f - V25 / AV_SLOPE,
 				.u1 = 0, .in = 0 },
 
-		.scale = { .inj = 3.3 / 4095.,
-				.u2 = -0.001880341880341881,
-				.iL =
-				1.9794e-03, .temperature = 3.3 / (4095. * AV_SLOPE),
-				.u1 = 0.024982,
-				.in = 9.8970e-04 },
+		.scale = { .inj = 3.3 / 4095., .u2 = -0.001880341880341881, .iL =
+				1.9794e-03, .temperature = 3.3 / (4095. * AV_SLOPE), .u1 =
+				0.024982, .in = 9.8970e-04 },
 
-		.dac[0] = {.shift = 0., .scale = 4095./5. },
+		.dac[0] = { .shift = 0., .scale = 4095. / 5. },
 
-		.dac[1] = {.shift = 0, .scale = 4095./5.},
-};
+		.dac[1] = { .shift = 0, .scale = 4095. / 5. }, };
 
-Protect_Struct Boost_Protect = {
-		.iL_max = 8.,
-		.in_max = 3.,
-		.u1_max = 90.,
+Protect_Struct Boost_Protect = { .iL_max = 8., .in_max = 3., .u1_max = 90.,
 		.u2_max = 100.,
 
-		.iL_n = 6.,
-		.iL_int_max = 6. * 10.,
+		.iL_n = 6., .iL_int_max = 6. * 10.,
 
-		.sat = {
-				.duty_min = 0.02,
-				.duty_max = 0.98,
-		},
-};
+		.sat = { .duty_min = 0.02, .duty_max = 0.98, }, };
 
+LinearRamp_Struct LINEAR_RAMP = { .integrator = { .k = 0.25 * TS, .sat = {
+		.min = -999999., .max = 999999. }, }, };
 
-LinearRamp_Struct LINEAR_RAMP =
-{
-		.integrator =
-		{
-				.k = 0.25 * TS,
-				.sat = {.min = -999999., .max = 999999.},
-		},
-};
+SSHapedRamp_Struct SSHAPED_RAMP = { .integrator[0] =
+{ .k = 1. * TS, .sat = { .min = -999999., .max = 999999. } },
 
-SSHapedRamp_Struct SSHAPED_RAMP =
-{
-		.integrator[0] =
-		{
-				.k = 1.*TS,
-				.sat = { .min = -999999., .max = 999999.}
-		},
-
-		.integrator[1] =
-		{
-				.k = 0.25 *TS,
-				.sat = { .min = -999999., .max = 999999.}
-		},
-		.k3 = 0.125
+.integrator[1] =
+{ .k = 0.25 * TS, .sat = { .min = -999999., .max = 999999. } }, .k3 = 0.125
 
 };
 
@@ -113,7 +77,6 @@ MovingFloatFilter_Struct IN_FILTER;
 float REF_CURRENT = 0.;
 float REF_VOLTAGE = 97.;
 
-
 volatile float TEMPERATURE;
 void shift_and_scale(void);
 void set_shifts(void);
@@ -122,8 +85,6 @@ void integral_protect(void);
 
 void timer_PWM_Off(void);
 void DMA2_Stream0_IRQHandler(void) {
-
-
 
 	// Сброс флага DMA2 по окончанию передачи данных
 	DMA2->LIFCR |= DMA_LIFCR_CTCIF0;
@@ -137,8 +98,11 @@ void DMA2_Stream0_IRQHandler(void) {
 
 	set_shifts();
 
+#ifdef CONTROL_MASTER
+
 	// Усреднение выходного тока
-	Boost_Measure.data.in_av = MovingFloatFilter(&IN_FILTER, Boost_Measure.data.in);
+	Boost_Measure.data.in_av = MovingFloatFilter(&IN_FILTER,
+			Boost_Measure.data.in);
 
 //	static unsigned int cnt = 0; // 50 = 0.01 / 2 * Fs
 //	cnt++;
@@ -151,39 +115,49 @@ void DMA2_Stream0_IRQHandler(void) {
 
 // Voltage loop calculate
 	// Ошибка регулирования по напряжению
-	float error_Voltage = U_REF -  Boost_Measure.data.u2 + Boost_Measure.data.in_av * R_COMP;
+	float error_Voltage = U_REF - Boost_Measure.data.u2 + Boost_Measure.data.in_av * R_COMP;
+
 	// Расчёт ПИД - регулятора
-     REF_CURRENT = PID_Controller(&Boost_Control.pid_voltage, error_Voltage) + Boost_Measure.data.inj * (0.0f / 1.65f );
+	REF_CURRENT = PID_Controller(&Boost_Control.pid_voltage, 0.5 * error_Voltage) + Boost_Measure.data.inj * (0.0f / 1.65f);
 	// Уставка на ток реактора = 4А
 	//REF_CONTROLLER = 3.5f + Boost_Measure.data.inj * (0.4f / 1.65f );
 
-	// Ошибка регулирования
-	float error_current = REF_CURRENT - Boost_Measure.data.iL;
 
+#endif
+
+	// Ошибка регулирования тока ректора
+		float error_current = REF_CURRENT - Boost_Measure.data.iL;
 
 	// Расчёт ПИД - регулятора
-	float PID_output = PID_Controller(&Boost_Control.pid_current, error_current);
+	float PID_output = PID_Controller(&Boost_Control.pid_current,
+			error_current);
+
+
+
 	Boost_Control.duty = PID_output;
 
 	// Холостой ход (Burst mode)
 	if ((Boost_Control.duty < Boost_Protect.sat.duty_min) || (REF_CURRENT < 0))
 		TIM8->CCR1 = 0;
-	else if(Boost_Control.duty > Boost_Protect.sat.duty_max )
+	else if (Boost_Control.duty > Boost_Protect.sat.duty_max)
 		TIM8->CCR1 = TIM8->ARR * Boost_Protect.sat.duty_max;
 	else
 		TIM8->CCR1 = TIM8->ARR * Boost_Control.duty;
 
 	// Регистр сравнения: ARR * (коэффициент заполнения)
-		// TIM8->CCR1 = TIM8->ARR * LIMIT(Boost_Control.duty, Boost_Protect.sat.duty_min,Boost_Protect.sat.duty_max);
+	// TIM8->CCR1 = TIM8->ARR * LIMIT(Boost_Control.duty, Boost_Protect.sat.duty_min,Boost_Protect.sat.duty_max);
 
 	/* Вывод сигнала на цап*/
 	unsigned int dac1, dac2;
 
 	//
-	Boost_Measure.dac[0].data =  REF_CURRENT;
+	Boost_Measure.dac[0].data = REF_CURRENT;
 
 	// Выводим переменную на ЦАП2
-	Boost_Measure.dac[1].data = REF_CURRENT - Boost_Measure.data.inj * (0.0f / 1.65f );
+	Boost_Measure.dac[1].data = REF_CURRENT
+			- Boost_Measure.data.inj * (0.0f / 1.65f);
+
+
 
 	// Фильтруем переменную
 	//dac2 = MovingFloatFilter(&FILTER_MOV, Boost_Measure.data.inj) * (4095.f / 100.f);
@@ -266,7 +240,7 @@ void protect_software(void) {
 /**
  * \brief Функция интегрально-токовой защиты по току реактора
  */
-void integral_protect(void){
+void integral_protect(void) {
 
 	// Разница между током реатора и его номинальным значением
 	float x = Boost_Measure.data.iL - Boost_Protect.iL_n;
@@ -275,10 +249,11 @@ void integral_protect(void){
 	Boost_Protect.iL_int_sum = Boost_Protect.iL_int_sum + x * TS;
 
 	// Обнуляем интегратор в нормальном режиме работы
-	if (Boost_Protect.iL_int_sum < 0) Boost_Protect.iL_int_sum = 0;
+	if (Boost_Protect.iL_int_sum < 0)
+		Boost_Protect.iL_int_sum = 0;
 
 	// Проверяем условие срабаотывания защиты
-	if(Boost_Protect.iL_int_sum > Boost_Protect.iL_int_max){
+	if (Boost_Protect.iL_int_sum > Boost_Protect.iL_int_max) {
 		Boost_Protect.iL_int_sum = 0;
 		timer_PWM_Off();
 		GPIOD->ODR &= ~((1 << 2) | (1 << 3) | (1 << 4) | (1 << 5));
@@ -286,11 +261,78 @@ void integral_protect(void){
 	}
 }
 
+/**
+ * \brief функция-обработчик входного пакета на стороне ведущего
+ */
+
+void master_receive(void) {
+	 // Получаем состояние защит
+		 uint32_t status = USART1_DATA.buffer_rx[0];
+
+		 if (status){
+			 timer_PWM_Off();
+			 GPIOD->ODR |= status;
+		 }
+}
+
+/**
+ * \brief Функция для сборки и отправки пакета на стороне ведущего
+ */
+void master_transmit(void) {
+
+	// Записываем значение переменной в буфер отправки.
+	// Заполняются элементы массива от 0 до 3.
+	*(float*) &USART1_DATA.buffer_tx[0] = REF_CURRENT;
+	// Записываем состояние защит в буфер отправки.
+	USART1_DATA.buffer_tx[4] = GPIOD->ODR & 0x3E;
+	// Расчёт CRC-16.
+	uint16_t crc = calc_CRC16(USART1_DATA.buffer_tx, 5);
+
+	USART1_DATA.buffer_tx[5] = crc & 0xFF;
+	USART1_DATA.buffer_tx[6] = crc >> 8;
+
+	// Отправляем данные.
+	transmit_USART1(7);
+}
+
+/**
+ * \brief функция-обработчик входного пакета на стороне ведомого
+ */
+void slave_receive(void) {
+	// Получаем значение уставки на ток реактора
+	// Значение из элементов массива от 0 до 3
+	REF_CURRENT = *(float*) &USART1_DATA.buffer_rx[0];
+
+	 // Получаем состояние защит
+	 uint32_t status = USART1_DATA.buffer_rx[4];
+
+	 if (status){
+		 timer_PWM_Off();
+		 GPIOD->ODR |= status;
+	 }
+}
+
+/**
+ * \brief Функция для сборки и отправки пакета на стороне ведомого
+ */
+void slave_transmit(void) {
+	// Записываем состояние защит в буфер отправки.
+	*(float*) &USART1_DATA.buffer_tx[0] = GPIOD->ODR & 0x3E;
+
+	// Расчёт CRC-16.
+	uint16_t crc = calc_CRC16(USART1_DATA.buffer_tx, 1);
+
+	USART1_DATA.buffer_tx[4] = crc & 0xFF;
+	USART1_DATA.buffer_tx[5] = crc >> 8;
+
+	// Отправляем данные.
+	transmit_USART1(3);
+}
 
 /**
  *  \brief Функция обработчик прерывания EXTI1 (1 линия), PB1.
  */
-void EXTI1_IRQHandler(void){
+void EXTI1_IRQHandler(void) {
 
 	// Сброс флага прерывания EXTI1.
 	EXTI->PR |= EXTI_PR_PR1;
@@ -301,6 +343,5 @@ void EXTI1_IRQHandler(void){
 	//	timer_PWM_Off();
 	//else
 	//	timer_PWM_On();
-
 
 }

@@ -3,18 +3,23 @@
 #include "stm32f7xx.h"
 #include "uart.h"
 #include "timer.h"
-#include "contril.h"
+#include "control.h"
+#include "crc.h"
+
+
+
+
 void init_interrupt(void) {
 
 	// Выбор варианта прерывания 3(16 групп по 16 прерываний)
 	NVIC_SetPriorityGrouping(3);
 
-	// Установка приоритет прерыванийя TIM8_UP_TIM13: группа 1, приоритет 1
-	//NVIC_SetPriority(TIM8_UP_TIM13_IRQn,
-	//		NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 1, 1));
+	// Установка приоритет прерыванийя TIM8_UP_TIM13: группа 3, приоритет 1
+	NVIC_SetPriority(TIM1_UP_TIM10_IRQn,
+	NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 3, 2));
 
-	// Включаем прерывание TIM8_UP_TIM13 в NVIC
-	//NVIC_EnableIRQ(TIM8_UP_TIM13_IRQn);
+	// Включаем прерывание TIM1_UP_TIM10 в NVIC
+	NVIC_EnableIRQ(TIM1_UP_TIM10_IRQn);
 
 	// Установка приоритет прерыванийя
 	NVIC_SetPriority(DMA2_Stream0_IRQn,
@@ -39,14 +44,16 @@ void init_interrupt(void) {
 	NVIC_EnableIRQ(USART1_IRQn);
 }
 
-void TIM8_UP_TIM13_IRQHandler(void) {
+void TIM1_UP_TIM10_IRQHandler(void) {
 
-	TIM8->SR &= ~TIM_SR_UIF; // Сброс фалага прерывания
+	TIM1->SR &= ~TIM_SR_UIF; // Сброс фалага прерывания
 	__ISB(); // Ожидание выполнения всех инструкций в конвейере(pipeline)
 
-	GPIOD->ODR ^= 1 << 6;
+	master_transmit();
 
 }
+
+
 
 void USART1_IRQHandler()
 {
@@ -73,32 +80,46 @@ void USART1_IRQHandler()
             USART1->CR1 |= USART_CR1_TCIE;
         }
     }
-
-    // Прерывание по таймауту отсутствия байтов на приём.
     if (USART1->ISR & USART_ISR_RTOF)
-    {
-        // Очищаем соответствующий бит статуса UART.
-        USART1->ICR |= USART_ICR_RTOCF;
+        {
+            // Очищаем соответствующий бит статуса UART.
+            USART1->ICR |= USART_ICR_RTOCF;
 
-        USART1_DATA.buffer_tx[0] = 200;
+            if(USART1_DATA.counter_tx > 2)
+            {
 
-        // Отправляем 1 байт
-        transmit_USART1(1);
+            // Расчёт CRC-16.
+            uint16_t crc = calc_CRC16(USART1_DATA.buffer_rx, USART1_DATA.counter_rx - 2);
 
-        if(USART1_DATA.buffer_rx[0] == 10){
-        	timer_PWM_On();
-        	GPIOD->ODR &= ~((1 << 2) | (1 << 3) | (1 << 4) | (1 << 5));
+            // Байты CRC расчитанного.
+            uint8_t crc_1 = crc & 0xFF;
+            uint8_t crc_2 = crc >> 8;
+
+            // Байты CRC принятого.
+            uint8_t crc_rx_1 = USART1_DATA.buffer_rx[USART1_DATA.counter_rx - 2];
+            uint8_t crc_rx_2 = USART1_DATA.buffer_rx[USART1_DATA.counter_rx - 1];
+
+            // Проверяем соответствие CRC.
+            if ( (crc_1 == crc_rx_1) && (crc_2 == crc_rx_2))
+            {
+#ifdef CONTROL_MASTER
+            	master_receive();
+#else
+            	slave_receive();
+            	slave_transmit();
+#endif
+            }
+            }
+
+            /*
+
+            ВСТАВИТЬ ОБРАБОТКУ ПРИНЯТЫХ БАЙТОВ И ФОРМИРОВАНИЕ ОТВЕТА.
+
+            */
+
+            // Очищаем счётчик принятых байт для следующего приёма.
+            USART1_DATA.counter_rx = 0;
         }
-        else if (USART1_DATA.buffer_rx[0] == 20) timer_PWM_Off();
-        /*
-
-        ВСТАВИТЬ ОБРАБОТКУ ПРИНЯТЫХ БАЙТОВ И ФОРМИРОВАНИЕ ОТВЕТА.
-
-        */
-
-        // Очищаем счётчик принятых байт для следующего приёма.
-        USART1_DATA.counter_rx = 0;
-    }
 
     // Прерывание по окончанию передачи.
     if ((USART1->ISR & USART_ISR_TC) && (USART1->CR1 & USART_CR1_TCIE))

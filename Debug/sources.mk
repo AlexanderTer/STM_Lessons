@@ -22,6 +22,8 @@ C_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
+Drivers/CMSIS/DSP/Source/CommonTables \
+Drivers/CMSIS/DSP/Source/FastMathFunctions \
 Src \
 Src/periph \
 Startup \

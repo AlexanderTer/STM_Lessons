@@ -1,1 +1,4 @@
-../Src/periph/timer.c:4:6:init_timer8	4	static
+../Src/periph/timer.c:4:6:init_timer8	8	static
+../Src/periph/timer.c:41:6:init_TIMER1	4	static
+../Src/periph/timer.c:56:6:timer_PWM_On	4	static
+../Src/periph/timer.c:63:6:timer_PWM_Off	4	static

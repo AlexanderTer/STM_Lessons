@@ -1,1 +1,3 @@
+D:/STM_Lessons/Drivers/CMSIS/Include/core_cm7.h:2229:22:SCB_EnableICache	4	static,ignoring_inline_asm
+D:/STM_Lessons/Drivers/CMSIS/Include/core_cm7.h:2265:22:SCB_InvalidateICache	4	static,ignoring_inline_asm
 ../Src/periph/rcc.c:3:6:init_RCC	16	static

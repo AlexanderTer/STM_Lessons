@@ -15,6 +15,10 @@
  *
  ******************************************************************************
  */
+
+
+
+
 #include <stdint.h>
 #include <math.h>
 #include "stm32f7xx.h"
@@ -30,6 +34,7 @@
 #include "dsp.h"
 #include "uart.h"
 #include "control.h"
+#include "crc.h"
 
 int main(void) {
 	// Global interrupt disable
@@ -44,6 +49,11 @@ int main(void) {
 
 	init_timer8();
 	init_uart();
+	init_CRC();
+
+#ifdef CONTROL_MASTER
+	init_TIMER1();
+#endif
 
 	for (int i = 0; i < 5000; i++)
 		;
@@ -66,19 +76,12 @@ int main(void) {
 			//extern float REF_CONTROLLER;
 			//REF_CONTROLLER = IL_REF1;
 
-			PID_RESET
-
-
-
-
+			PID_RESET(&Boost_Control.pid_voltage);
+			PID_RESET(&Boost_Control.pid_current);
 			timer_PWM_On();
 			GPIOD->ODR &= ~((1 << 2) | (1 << 3) | (1 << 4) | (1 << 5));
 		}
 
 	}
 }
-
-
-
-
 

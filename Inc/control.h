@@ -14,11 +14,13 @@
 #define R_COMP (0.47f)
 
 // Макрос для сбросаПИД-регулятора
-#define PID_RESET(pid) (pid->integrator.sum = 0, pid->diff.xz = 0)
+#define PID_RESET(pid)  ( (pid)->integrator.sum = 0, (pid)->diff.xz = 0 )
 
 typedef struct {
 
-	float duty; // Коэффициент заполнения, [0..1]
+	float duty; 					// Коэффициент заполнения, [0..1]
+	float iL_ref;					// Уставка на ток рекатора
+
 	PID_Controller_Struct pid_current;// Структура регулятора тока реактора
 	PID_Controller_Struct pid_voltage;// Структура регулятора напряжения
 
@@ -72,5 +74,11 @@ typedef struct {
 extern Control_Struct Boost_Control;
 extern Measure_Struct Boost_Measure;
 extern Protect_Struct Boost_Protect;
+
+
+void master_receive(void);
+void master_transmit(void);
+void slave_receive(void);
+void slave_transmit(void);
 
 #endif

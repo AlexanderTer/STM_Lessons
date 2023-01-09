@@ -28,8 +28,8 @@ void init_uart(void) {
 	// (8 бит + 1 старт бит + 1 стоп бит) * 3.5 = 35
 	USART1->RTOR = 35;
 
-	// Скорость обмена 23400 бод
-	USART1->BRR = 0x1D4;
+	// Скорость обмена 460800 бод
+	USART1->BRR = 0x0EA;
 
 	//Количество стоп битов = 1
 	USART1->CR2 &= ~(USART_CR2_STOP_0 | USART_CR2_STOP_1);

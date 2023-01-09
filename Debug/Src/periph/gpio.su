@@ -1,4 +1,4 @@
 ../Src/periph/gpio.c:7:6:init_GPIO	8	static
-../Src/periph/gpio.c:29:6:init_GPIO_Output	16	static
-../Src/periph/gpio.c:34:6:init_GPIO_AFunction	24	static
-../Src/periph/gpio.c:43:6:init_GPIO_Analog	16	static
+../Src/periph/gpio.c:57:6:init_GPIO_Output	16	static
+../Src/periph/gpio.c:62:6:init_GPIO_AFunction	24	static
+../Src/periph/gpio.c:71:6:init_GPIO_Analog	16	static

@@ -15,7 +15,7 @@ typedef struct {
 	uint32_t counter_rx;
 
 	// Буфер передачи данных
-	int8_t buffer_tx[USART_BUFFER_TX_SIZE];
+	uint8_t buffer_tx[USART_BUFFER_TX_SIZE];
 
 	// Счётчик переданных данных
 	uint32_t counter_tx;

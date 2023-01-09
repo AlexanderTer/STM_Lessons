@@ -12,6 +12,8 @@ RM := rm -rf
 -include Startup/subdir.mk
 -include Src/periph/subdir.mk
 -include Src/subdir.mk
+-include Drivers/CMSIS/DSP/Source/FastMathFunctions/subdir.mk
+-include Drivers/CMSIS/DSP/Source/CommonTables/subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
