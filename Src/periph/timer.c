@@ -8,7 +8,7 @@ void init_timer8(void) {
 	// Предделитель таймера 1
 	// Макс счёт 1079 (100кГц)
 	TIM8->PSC = 0;
-	TIM8->ARR = 216000000 / 100000 / 2 - 1;
+	TIM8->ARR = 216000000 / 100000 / 2;
 
 
 
@@ -40,12 +40,12 @@ void init_timer8(void) {
 
 void init_TIMER1(void){
 	// Включение тактирования модуля таймер8
-		RCC->APB2ENR |= RCC_APB2ENR_TIM8EN;
+		RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
 
 		// Предделитель таймера 2
 		// Макс счёт 43200 (2.5 кгц)
 		TIM1->PSC = 1;
-		TIM1->ARR = 216000000 / 2500 - 1;
+		TIM1->ARR = 216000000/ 2 / 2500;
 		// Вкл прерывания по обновлению
 		TIM1->DIER |= TIM_DIER_UIE;
 		// Вкл счёт таймера

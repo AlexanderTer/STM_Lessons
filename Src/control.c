@@ -317,13 +317,13 @@ void slave_receive(void) {
  */
 void slave_transmit(void) {
 	// Записываем состояние защит в буфер отправки.
-	*(float*) &USART1_DATA.buffer_tx[0] = GPIOD->ODR & 0x3E;
+	USART1_DATA.buffer_tx[0] = GPIOD->ODR & 0x3E;
 
 	// Расчёт CRC-16.
 	uint16_t crc = calc_CRC16(USART1_DATA.buffer_tx, 1);
 
-	USART1_DATA.buffer_tx[4] = crc & 0xFF;
-	USART1_DATA.buffer_tx[5] = crc >> 8;
+	USART1_DATA.buffer_tx[1] = crc & 0xFF;
+	USART1_DATA.buffer_tx[2] = crc >> 8;
 
 	// Отправляем данные.
 	transmit_USART1(3);

@@ -85,7 +85,7 @@ void USART1_IRQHandler()
             // Очищаем соответствующий бит статуса UART.
             USART1->ICR |= USART_ICR_RTOCF;
 
-            if(USART1_DATA.counter_tx > 2)
+            if(USART1_DATA.counter_rx > 2)
             {
 
             // Расчёт CRC-16.
