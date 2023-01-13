@@ -68,15 +68,14 @@ int main(void) {
 		//	GPIOD->ODR ^= 1 << 1;
 
 		// Проверяем PB1 (SW1) на ноль.
-		if (!(GPIOB->IDR & (1 << 1)))
-			Boost_Measure.count = SET_SHIFTS_MAX_COUNT;
+
 
 		// Проверить PB2 (sw2) на ноль
 		if (!(GPIOB->IDR & (1 << 2))) {
 			//extern float REF_CONTROLLER;
 			//REF_CONTROLLER = IL_REF1;
 
-			PID_RESET(&Boost_Control.pid_voltage);
+
 			PID_RESET(&Boost_Control.pid_current);
 			timer_PWM_On();
 			GPIOD->ODR &= ~((1 << 2) | (1 << 3) | (1 << 4) | (1 << 5));

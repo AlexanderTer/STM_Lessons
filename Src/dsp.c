@@ -201,6 +201,25 @@ float Trapezoidal_Integrator(Integrator_Struct *integrator, float x) {
 	return out;
 }
 
+
+/**
+ * \brief Функция интегратора методом трапеций [Q16]
+ * \param integrator: структура с параметрами интегратора
+ * \param x: вход интегратора
+ * \return y: выход интегратора
+ */
+int32_t Trapezoidal_Integrator_Q16(Integrator_Q16_Struct *integrator, int32_t x) {
+
+	// y[n] = s[n-1] + x[n]*k
+	int32_t out = LIMIT( integrator->sum + MUL_Q(x, integrator->k), integrator->sat.min, integrator->sat.max);
+
+
+	// s[n] = y[n] * k
+	integrator->sum = out + MUL_Q(x, integrator->k);
+	return out;
+}
+
+
 /**
  * \brief Функция интегратора методом трапеций
  * \param integrator: структура с параметрами интегратора
@@ -246,6 +265,18 @@ float BackwardEuler_Diff(Diff_Struct *diff, float x) {
 
 }
 
+int32_t BackwardEuler_Diff_Q16(Diff_Q16_Struct *diff, int32_t x) {
+
+	// y[n] = (x[n] - x[n-1]) * k
+	int32_t out = MUL_Q((x - diff->xz), diff->k);
+
+	// Сохнаняем текущее значение х
+	diff->xz = x;
+	return out;
+
+}
+
+
 float PID_Controller(PID_Controller_Struct *pid, float x) {
 
 	// Расчёт пропорциональной части
@@ -258,6 +289,21 @@ float PID_Controller(PID_Controller_Struct *pid, float x) {
 	float out_d = BackwardEuler_Diff(&pid->diff, x);
 	return LIMIT(out_p + out_i + out_d, pid->sat.min, pid->sat.max);
 }
+
+int32_t PID_Controller_Q16(PID_Controller_Q16_Struct *pid, int32_t x) {
+
+	// Расчёт пропорциональной части
+	int32_t out_p = MUL_Q(x, pid->kp);
+
+	// Расчёт интегральной части
+	int32_t out_i = Trapezoidal_Integrator_Q16(&pid->integrator, x);
+
+	// Расчёт дифференциальной части
+	int32_t out_d = BackwardEuler_Diff_Q16(&pid->diff, x);
+	return LIMIT(out_p + out_i + out_d, pid->sat.min, pid->sat.max);
+}
+
+
 
 /**
  * \brief Функция ПИД-регулятора с защитой от насыщения интегратора методом BackCalculation
